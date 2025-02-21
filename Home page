@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ToolsHub - Online Tools</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Basic Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f9f9f9;
+    }
+
+    /* Navbar */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background-color: #333;
+      color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    header .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    header nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+
+    header nav ul li a {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    header .search input {
+      padding: 5px;
+      border: none;
+      border-radius: 5px;
+    }
+
+    header .cta {
+      padding: 10px 20px;
+      background-color: #ff6600;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    /* Main Content */
+    main {
+      padding: 20px;
+    }
+
+    /* Tools Grid */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .tool-card {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .tool-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    .tool-card h3 {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .tool-card p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .tool-card button {
+      padding: 10px 20px;
+      background-color: #ff6600;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    /* Footer */
+    footer {
+      background-color: #333;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+
+    footer .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    footer ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+
+    footer ul li a {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    footer .social-icons {
+      display: flex;
+      gap: 10px;
+    }
+
+    footer .social-icons a {
+      color: #fff;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <header>
+    <div class="logo">ToolsHub</div>
+    <nav>
+      <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Tools</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="search">
+      <input type="text" placeholder="Search tools...">
+    </div>
+    <button class="cta">Get Started</button>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <h1 style="text-align: center; margin: 20px 0;">Explore Our Tools</h1>
+    <div class="tools-grid">
+      <!-- Image Compressor -->
+      <div class="tool-card">
+        <img src="https://via.placeholder.com/300" alt="Image Compressor">
+        <h3>Image Compressor</h3>
+        <p>Reduce the size of your images without losing quality.</p>
+        <button>Use Tool</button>
+      </div>
+
+      <!-- Image Converter -->
+      <div class="tool-card">
+        <img src="https://via.placeholder.com/300" alt="Image Converter">
+        <h3>Image Converter</h3>
+        <p>Convert images to different formats like JPG, PNG, and more.</p>
+        <button>Use Tool</button>
+      </div>
+
+      <!-- Image Resizer -->
+      <div class="tool-card">
+        <img src="https://via.placeholder.com/300" alt="Image Resizer">
+        <h3>Image Resizer</h3>
+        <p>Resize images to your desired dimensions.</p>
+        <button>Use Tool</button>
+      </div>
+
+      <!-- PDF to Word -->
+      <div class="tool-card">
+        <img src="https://via.placeholder.com/300" alt="PDF to Word">
+        <h3>PDF to Word</h3>
+        <p>Convert PDF files to editable Word documents.</p>
+        <button>Use Tool</button>
+      </div>
+
+      <!-- Video Compressor -->
+      <div class="tool-card">
+        <img src="https://via.placeholder.com/300" alt="Video Compressor">
+        <h3>Video Compressor</h3>
+        <p>Compress videos to reduce file size.</p>
+        <button>Use Tool</button>
+      </div>
+
+      <!-- QR Code Generator -->
+      <div class="tool-card">
+        <img src="https://via.placeholder.com/300" alt="QR Code Generator">
+        <h3>QR Code Generator</h3>
+        <p>Create QR codes for URLs, text, and more.</p>
+        <button>Use Tool</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="logo">ToolsHub</div>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+      </ul>
+      <div class="social-icons">
+        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
