@@ -67,7 +67,7 @@ body.dark-mode #main-page .header .tagline {
     width: 100%;
     border-radius: 25px;
     background: rgba(255, 255, 255, .95);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, .1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
     padding: 10px;
     backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 103, 31, .2);
@@ -76,7 +76,7 @@ body.dark-mode #main-page .header .tagline {
 
 body.dark-mode .search-box {
     background: rgba(30, 30, 30, .95);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, .3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .3);
     border-color: rgba(255, 103, 31, .4)
 }
 
@@ -146,13 +146,13 @@ body.dark-mode #results-page {
     background: rgba(255, 255, 255, .95);
     position: sticky;
     top: 0;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, .1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
     z-index: 1000
 }
 
 body.dark-mode .results-header {
     background: rgba(30, 30, 30, .95);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, .3)
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .3)
 }
 
 .header-logo {
@@ -227,17 +227,16 @@ body.dark-mode .sub-header {
 
 #tabs-container {
     display: inline-flex;
-    gap: 15px
+    gap: 10px
 }
 
 #tabs-container .tab-button {
-    padding: 8px 12px;
-    margin-right: 5px;
+    padding: 8px 15px;
     border: none;
     font-size: 14px;
     cursor: pointer;
     color: var(--light-subtext);
-    transition: color .15s ease-in-out
+    transition: color .15s ease-in-out, border-bottom .15s ease-in-out
 }
 
 #tabs-container .tab-button.active {
@@ -264,13 +263,13 @@ body.dark-mode #tabs-container .tab-button.active {
     border-radius: 10px;
     background: rgba(255, 255, 255, .95);
     border: 1px solid rgba(255, 103, 31, .2);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, .1)
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .1)
 }
 
 body.dark-mode #instant-answer-container .widget-card {
     background: rgba(30, 30, 30, .95);
     border-color: rgba(255, 103, 31, .4);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, .3)
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .3)
 }
 
 #results-container {
@@ -285,7 +284,9 @@ body.dark-mode #instant-answer-container .widget-card {
     background: rgba(255, 255, 255, .95);
     border-radius: 10px;
     border: 1px solid rgba(255, 103, 31, .2);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, .1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+    display: flex;
+    align-items: center;
     transition: transform .15s ease-in-out, box-shadow .15s ease-in-out
 }
 
@@ -297,17 +298,29 @@ body.dark-mode #instant-answer-container .widget-card {
 body.dark-mode #results-container .result-item {
     background: rgba(30, 30, 30, .95);
     border-color: rgba(255, 103, 31, .4);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, .3)
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .3)
 }
 
 body.dark-mode #results-container .result-item:hover {
     box-shadow: 0 6px 15px rgba(255, 103, 31, .4)
 }
 
+#results-container .result-item img {
+    max-width: 100px;
+    margin-right: 15px;
+    vertical-align: middle
+}
+
+body.dark-mode #results-container .result-item img {
+    filter: brightness(0.9)
+}
+
 #results-container .result-item a {
     color: var(--primary-color);
     text-decoration: none;
-    transition: color .15s ease-in-out
+    transition: color .15s ease-in-out;
+    font-size: 16px;
+    font-weight: 500
 }
 
 #results-container .result-item a:hover {
@@ -322,14 +335,23 @@ body.dark-mode #results-container .result-item a:hover {
     color: #FFD700
 }
 
-#results-container .result-item img {
-    max-width: 100px;
-    margin-right: 10px;
-    vertical-align: middle
+#results-container .result-item p {
+    color: var(--light-subtext);
+    margin: 5px 0;
+    font-size: 14px
 }
 
-body.dark-mode #results-container .result-item img {
-    filter: brightness(0.9)
+body.dark-mode #results-container .result-item p {
+    color: var(--dark-text)
+}
+
+#results-container .result-item small {
+    color: #888;
+    font-size: 12px
+}
+
+body.dark-mode #results-container .result-item small {
+    color: #bbb
 }
 
 #related-searches {
