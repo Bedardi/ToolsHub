@@ -2,9 +2,9 @@
 <html lang="hi" manifest="app.manifest">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device=device-width, initial-scale=1.0">
-    <meta name="description" content="MistaFy: भारत का AI-powered सर्च इंजन - तेज, सुरक्षित, और बहुभाषी।">
-    <title>MistaFy - भारत का AI सर्च</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MistaFy: भारत का हल्का और AI-संचालित सर्च इंजन।">
+    <title>MistaFy - भारत का सर्च</title>
     <link rel="stylesheet" href="styles.min.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#FF671F">
@@ -12,14 +12,33 @@
 <body>
     <main id="main-page">
         <h1 class="logo">Mista<span>Fy</span></h1>
-        <p class="tagline">भारत का AI सर्च इंजन। तेज। सुरक्षित। स्वदेशी।</p>
+        <p class="tagline">भारत का AI सर्च। तेज। सुरक्षित। स्वदेशी।</p>
         <div class="search-container">
             <form class="search-box" id="main-search-form" onsubmit="return false;">
-                <input type="text" id="main-search-input" placeholder="AI से पूछें: मौसम दिल्ली, क्रिकेट स्कोर, 1 USD to INR..." autocomplete="off" required>
-                <button type="button" id="voice-search-btn" title="बोलकर खोजें">🎤</button>
-                <button type="button" id="ai-mode-btn" title="AI मोड">🤖</button>
-                <button type="button" id="upload-btn" title="चित्र अपलोड करें">📷</button>
-                <button type="submit" id="main-search-button">🔍</button>
+                <input type="text" id="main-search-input" placeholder="खोजें: मौसम दिल्ली, क्रिकेट, 1 USD to INR..." autocomplete="off" required>
+                <button type="button" id="voice-search-btn" title="बोलकर खोजें">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#666" viewBox="0 0 16 16">
+                        <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                        <path d="M8 8a3 3 0 0 0 3-3V3a3 3 0 0 0-6 0v2a3 3 0 0 0 3 3z"/>
+                    </svg>
+                </button>
+                <button type="button" id="ai-mode-btn" title="AI मोड">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#666" viewBox="0 0 16 16">
+                        <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0z"/>
+                        <path d="M6.5 7.75v1.5a.75.75 0 0 0 1.5 0v-1.5a.75.75 0 0 0-1.5 0zm4 0v1.5a.75.75 0 0 0 1.5 0v-1.5a.75.75 0 0 0-1.5 0z"/>
+                    </svg>
+                </button>
+                <button type="button" id="upload-btn" title="चित्र अपलोड करें">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#666" viewBox="0 0 16 16">
+                        <path d="M6 6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V6z"/>
+                        <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10 1a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v6l2-2 2 2 2-2 2 2V3z"/>
+                    </svg>
+                </button>
+                <button type="submit" id="main-search-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                    </svg>
+                </button>
             </form>
             <div id="autocomplete-suggestions"></div>
         </div>
@@ -35,10 +54,29 @@
             <a href="#" class="header-logo" id="header-logo-home">Mista<span>Fy</span></a>
             <form class="header-search-form" id="results-search-form" onsubmit="return false;">
                 <input type="text" id="results-search-input" autocomplete="off">
-                <button type="button" id="results-voice-btn" title="बोलकर खोजें">🎤</button>
-                <button type="button" id="results-ai-mode-btn" title="AI मोड">🤖</button>
-                <button type="button" id="results-upload-btn" title="चित्र अपलोड करें">📷</button>
-                <button type="submit" id="results-search-button">🔍</button>
+                <button type="button" id="results-voice-btn" title="बोलकर खोजें">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#666" viewBox="0 0 16 16">
+                        <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                        <path d="M8 8a3 3 0 0 0 3-3V3a3 3 0 0 0-6 0v2a3 3 0 0 0 3 3z"/>
+                    </svg>
+                </button>
+                <button type="button" id="results-ai-mode-btn" title="AI मोड">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#666" viewBox="0 0 16 16">
+                        <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0z"/>
+                        <path d="M6.5 7.75v1.5a.75.75 0 0 0 1.5 0v-1.5a.75.75 0 0 0-1.5 0zm4 0v1.5a.75.75 0 0 0 1.5 0v-1.5a.75.75 0 0 0-1.5 0z"/>
+                    </svg>
+                </button>
+                <button type="button" id="results-upload-btn" title="चित्र अपलोड करें">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#666" viewBox="0 0 16 16">
+                        <path d="M6 6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V6z"/>
+                        <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10 1a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v6l2-2 2 2 2-2 2 2V3z"/>
+                    </svg>
+                </button>
+                <button type="submit" id="results-search-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                    </svg>
+                </button>
             </form>
             <div class="filters">
                 <select id="date-filter">
@@ -50,7 +88,11 @@
                 </select>
                 <input type="text" id="location-filter" placeholder="स्थान (e.g., दिल्ली)">
             </div>
-            <button id="menu-button" title="Menu">☰</button>
+            <button id="menu-button" title="Menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#666" viewBox="0 0 16 16">
+                    <path d="M1.5 2a.5.5 0 0 0 0 1h13a.5.5 0 0 0 0-1h-13zm0 3a.5.5 0 0 0 0 1h13a.5.5 0 0 0 0-1h-13zm0 3a.5.5 0 0 0 0 1h13a.5.5 0 0 0 0-1h-13z"/>
+                </svg>
+            </button>
         </header>
 
         <div class="sub-header">
@@ -91,17 +133,26 @@
             <h3>डेवलपर API</h3>
             <p>API से खोजें: <a href="https://mistafy.pages.dev/api?q=query" target="_blank">/api?q=query</a></p>
             <div class="developer-guide">
-                <p><strong>Guide:</strong> GET /api?q=your_query। JSON response (title, link, snippet, etc.)। Free, 500 req/day। Docs: <a href="https://mistafy.pages.dev/docs" target="_blank">mistafy.pages.dev/docs</a>।</p>
+                <p><strong>Guide:</strong> GET /api?q=your_query। JSON response। Free, 500 req/day। Docs: <a href="https://mistafy.pages.dev/docs" target="_blank">mistafy.pages.dev/docs</a>।</p>
             </div>
         </div>
         <div class="app-download">
             <a href="https://play.google.com/store/apps/details?id=com.mistafy.browser" target="_blank">MistaFy App डाउनलोड करें</a>
         </div>
-        <p style="color: var(--light-subtext); font-size: 12px;">MistaFy - Made in Bharat | 28 Sep 2025</p>
+        <p style="color: #666; font-size: 12px;">MistaFy - Made in Bharat | 28 Sep 2025</p>
     </div>
 
-    <button id="back-to-top" title="ऊपर जाएं">↑</button>
-    <button id="back-to-home" title="होम पर जाएं">🏠</button>
+    <button id="back-to-top" title="ऊपर जाएं">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#FF671F" viewBox="0 0 16 16">
+            <path d="M8 2.5a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-1 0V3a.5.5 0 0 1 .5-.5z"/>
+            <path d="M7.646 2.646a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1-.708.708L8 3.707 4.354 7.354a.5.5 0 1 1-.708-.708l4-4z"/>
+        </svg>
+    </button>
+    <button id="back-to-home" title="होम पर जाएं">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#FF671F" viewBox="0 0 16 16">
+            <path d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 2 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0 .146-.354l-6-6zM2.5 7.707l5-5 5 5v7h-3v-4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v4H2.5v-7z"/>
+        </svg>
+    </button>
     <input type="file" id="image-upload" accept="image/*" style="display:none;">
 
     <script src="app.min.js"></script>
