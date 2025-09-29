@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="MistaFy: भारत का तेज और मुफ्त सर्च इंजन।">
     <title>MistaFy - भारत का सर्च</title>
-    <link rel="stylesheet" href="styles.min.css">
+    <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#FF671F">
 </head>
@@ -16,36 +16,38 @@
             <p class="tagline">भारत का तेज और स्वदेशी सर्च।</p>
         </div>
         <div class="search-container">
-            <form class="search-box" id="main-search-form" onsubmit="return false;">
-                <input type="text" id="main-search-input" placeholder="खोजें: मेरा IP, कैलकुलेटर, मौसम दिल्ली..." autocomplete="off" required>
+            <form class="search-box" id="main-search-form">
+                <input type="text" id="main-search-input" placeholder="खोजें..." autocomplete="off" required>
+                <div id="autocomplete-suggestions" class="suggestions-dropdown"></div>
                 <button type="button" id="voice-search-btn" title="बोलकर खोजें">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#666" viewBox="0 0 16 16">
-                        <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                    <svg width="24" height="24" fill="#666" viewBox="0 0 16 16">
+                        <path d="M3.5 6.5a.5.5 0 0 1 .5.5v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
                         <path d="M8 8a3 3 0 0 0 3-3V3a3 3 0 0 0-6 0v2a3 3 0 0 0 3 3z"/>
                     </svg>
                 </button>
                 <button type="submit" id="main-search-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="white" viewBox="0 0 16 16">
-                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                    <svg width="24" height="24" fill="white" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001a1.007 1.007 0 0 0-.1.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
                     </svg>
                 </button>
             </form>
         </div>
     </main>
 
-    <div id="results-page" style="display:none;">
+    <div id="results-page" class="hidden">
         <header class="results-header">
             <a href="#" class="header-logo" id="header-logo-home">Mista<span>Fy</span></a>
-            <form class="header-search-form" id="results-search-form" onsubmit="return false;">
+            <form class="header-search-form" id="results-search-form">
                 <input type="text" id="results-search-input" autocomplete="off">
+                <div id="results-autocomplete-suggestions" class="suggestions-dropdown"></div>
                 <button type="submit" id="results-search-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="white" viewBox="0 0 16 16">
-                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                    <svg width="24" height="24" fill="white" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001a1.007 1.007 0 0 0-.1.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
                     </svg>
                 </button>
             </form>
-            <button id="menu-button" title="Menu" class="menu-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#666" viewBox="0 0 16 16">
+            <button id="menu-button" title="Menu">
+                <svg width="24" height="24" fill="#666" viewBox="0 0 16 16">
                     <path d="M1.5 2a.5.5 0 0 0 0 1h13a.5.5 0 0 0 0-1h-13zm0 3a.5.5 0 0 0 0 1h13a.5.5 0 0 0 0-1h-13zm0 3a.5.5 0 0 0 0 1h13a.5.5 0 0 0 0-1h-13z"/>
                 </svg>
             </button>
@@ -53,18 +55,29 @@
         <div class="sub-header">
             <div id="tabs-container"></div>
         </div>
-        <div id="instant-answer-container"></div>
-        <div id="results-container"></div>
+        <div id="ai-summary-container" class="shimmer"></div>
+        <div id="instant-answer-container" class="shimmer"></div>
+        <div id="results-container" class="shimmer"></div>
         <div id="related-searches"></div>
+        <div id="translate-container" class="hidden"></div>
+        <div id="find-in-page-container" class="hidden"></div>
     </div>
 
     <div id="side-menu">
-        <h3>Menu</h3>
+        <div class="side-menu-header">
+            <h3>Menu</h3>
+            <button id="close-menu-button" title="Close Menu">
+                <svg width="24" height="24" fill="#666" viewBox="0 0 16 16">
+                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854z"/>
+                </svg>
+            </button>
+        </div>
         <a href="javascript:location.reload();" class="action-btn">Refresh</a>
         <a href="#" id="menu-home-btn" class="action-btn">Home</a>
         <div class="theme-switch-wrapper">
             <span>Dark Mode</span>
-            <label class="theme-switch" for="theme-checkbox"><input type="checkbox" id="theme-checkbox" />
+            <label class="theme-switch">
+                <input type="checkbox" id="theme-checkbox">
                 <div class="slider round"></div>
             </label>
         </div>
@@ -77,7 +90,7 @@
                 <option value="month">पिछला महीना</option>
                 <option value="year">पिछला वर्ष</option>
             </select>
-            <input type="text" id="location-filter" placeholder="स्थान (e.g., दिल्ली)">
+            <input type="text" id="location-filter" placeholder="स्थान">
         </div>
         <div class="extra-tools">
             <h3>उपकरण</h3>
@@ -86,27 +99,28 @@
         </div>
         <div class="developer-section">
             <h3>डेवलपर API</h3>
-            <p>API: <a href="https://mistafy.pages.dev/api?q=query" target="_blank">/api?q=query</a></p>
-            <p>Docs: <a href="https://mistafy.pages.dev/docs" target="_blank">mistafy.pages.dev/docs</a></p>
+            <p><a href="https://mistafy.pages.dev/api?q=query" target="_blank">API</a></p>
+            <p><a href="https://mistafy.pages.dev/docs" target="_blank">Docs</a></p>
         </div>
         <div class="app-download">
-            <a href="https://play.google.com/store/apps/details?id=com.mistafy.browser" target="_blank">MistaFy App डाउनलोड करें</a>
+            <a href="https://play.google.com/store/apps/details?id=com.mistafy.browser" target="_blank">MistaFy App</a>
         </div>
-        <p style="color:#666;font-size:12px;">© 2025 MistaFy - Made in Bharat | 03:15 PM IST, 28 Sep 2025</p>
+        <p class="footer">© 2025 MistaFy</p>
     </div>
 
-    <button id="back-to-top" title="ऊपर जाएं">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#FF671F" viewBox="0 0 16 16">
+    <div id="overlay" class="overlay hidden"></div>
+    <button id="back-to-top" title="ऊपर जाएं" class="hidden">
+        <svg width="24" height="24" fill="#FF671F" viewBox="0 0 16 16">
             <path d="M8 2.5a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-1 0V3a.5.5 0 0 1 .5-.5z"/>
-            <path d="M7.646 2.646a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1-.708.708L8 3.707 4.354 7.354a.5.5 0 1 1-.708-.708l4-4z"/>
+            <path d="M7.646 2.646a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1-.708.708L8 3.707 4.354 7.354a.5.5 0 0 1-.708-.708l4-4z"/>
         </svg>
     </button>
-    <button id="back-to-home" title="होम पर जाएं">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#FF671F" viewBox="0 0 16 16">
-            <path d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 2 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0 .146-.354l-6-6zM2.5 7.707l5-5 5 5v7h-3v-4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v4H2.5v-7z"/>
+    <button id="back-to-home" title="होम पर जाएं" class="hidden">
+        <svg width="24" height="24" fill="#FF671F" viewBox="0 0 16 16">
+            <path d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 2 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0 .146-.354l-6-6z"/>
         </svg>
     </button>
 
-    <script src="app.min.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
