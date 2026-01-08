@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>HSYT Web Push</title>
+</head>
+<body>
+
+<button id="btn">Enable Notifications</button>
+
+<script type="module">
+/* =====================================
+   BROWSER + FEATURE CHECK
+===================================== */
+if (!("serviceWorker" in navigator)) {
+  alert("Service Worker not supported in this browser");
+  throw new Error("SW not supported");
+}
+
+/* =====================================
+   IMPORT FIREBASE (MODULAR)
+===================================== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getMessaging, getToken, onMessage, isSupported } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+
+/* =====================================
+   CHECK FCM SUPPORT
+===================================== */
+if (!(await isSupported())) {
+  alert("Firebase Messaging not supported in this browser");
+  throw new Error("FCM unsupported");
+}
+
+/* =====================================
+   FIREBASE CONFIG
+===================================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyAprBG6TO2upzPA1Ypf8obR3bu5FOBjsBk",
+  authDomain: "hsyt-esports-ce2ef.firebaseapp.com",
+  projectId: "hsyt-esports-ce2ef",
+  storageBucket: "hsyt-esports-ce2ef.firebasestorage.app",
+  messagingSenderId: "528987068136",
+  appId: "1:528987068136:web:d40cef4115bdc2b6491b5d"
+};
+
+/* =====================================
+   INIT FIREBASE
+===================================== */
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
+
+/* =====================================
+   REGISTER SERVICE WORKER
+===================================== */
+const swReg = await navigator.serviceWorker.register("/firebase-sw.js");
+
+/* =====================================
+   BUTTON HANDLER (SAFE)
+===================================== */
+document.getElementById("btn").onclick = async () => {
+
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") {
+    alert("Permission denied");
+    return;
+  }
+
+  const token = await getToken(messaging, {
+    vapidKey:
+      "BOBOinYkBFbVv_nmpoEpFzbl7R_rVe7O_MOWrgatpGOO9fJnkvrJXWPZX_YYaQARapN6-AQ1FYWdK7P1aLD5ADA",
+    serviceWorkerRegistration: swReg
+  });
+
+  console.log("✅ FCM TOKEN:", token);
+};
+
+/* =====================================
+   FOREGROUND MESSAGE
+===================================== */
+onMessage(messaging, payload => {
+  new Notification(payload.notification.title, {
+    body: payload.notification.body,
+    icon: "/icon.png"
+  });
+});
+</script>
+
+</body>
+</html>
