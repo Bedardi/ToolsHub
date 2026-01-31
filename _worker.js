@@ -23,7 +23,7 @@ export default {
         secret_key: env.ZAP_SECRET,
         amount: amount.toString(),
         order_id: order_id,
-        redirect_url: "https://mistafy.pages.dev/success.html"
+        redirect_url: "https://mistafy.pages.dev/success.html"  // ya jo bhi tera domain hai
       });
 
       let zapRes, zapData;
@@ -129,14 +129,14 @@ export default {
     }
 
     // =========================
-    // DEFAULT
+    // DEFAULT: Serve static assets (ads.js, HTML, sab kuch)
     // =========================
-    return new Response("Not Found", { status: 404 });
+    return env.ASSETS.fetch(request);
   }
 };
 
 // =========================
-// HELPERS
+// HELPERS (same as before)
 // =========================
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -145,7 +145,6 @@ function json(data, status = 200) {
   });
 }
 
-// ZapUPI-safe Order ID (A–Z, 0–9, 8–10 length)
 function generateOrderId() {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let id = "ZPU";
