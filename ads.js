@@ -31,7 +31,7 @@ const observer = new IntersectionObserver((entries) => {
         document.head.appendChild(style);
     }
 
-    // Loader
+    // Loader.
     slots.forEach(s => {
         observer.observe(s);
         s.innerHTML = `<div style="width:100%;height:100%;background:#050505;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid #222;"><div style="width:20px;height:20px;border:2px solid #333;border-top:2px solid #6366f1;border-radius:50%;animation:spin 1s linear infinite;"></div></div>`;
