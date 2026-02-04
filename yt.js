@@ -1,69 +1,37 @@
 (function() {
-    // 1. CSS Styles (Ghost Mode Enabled)
+    // 1. CSS Styles
     const css = `
         @import url('https://fonts.googleapis.com/icon?family=Material+Icons+Round');
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
         
-        .mp-container { 
-            position: relative; width: 100%; height: 100%; 
-            background: #000; overflow: hidden; 
-            font-family: 'Poppins', sans-serif; user-select: none; 
-            border-radius: 12px; aspect-ratio: 16/9; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-        }
-        
-        /* Layer System */
+        .mp-container { position: relative; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: 'Poppins', sans-serif; user-select: none; border-radius: 12px; aspect-ratio: 16/9; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
         .mp-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
         
-        /* Video Layer - Initially HIDDEN */
+        /* Ghost Mode Video */
         .mp-video-wrap { z-index: 1; pointer-events: none; opacity: 0; transition: opacity 0.4s ease-in; }
         .mp-video-wrap.active { opacity: 1; }
         .mp-video { width: 100%; height: 100%; transform: scale(1.6); border: none; }
         
-        /* Poster Layer */
-        .mp-poster { 
-            z-index: 5; background: #000 no-repeat center/cover; 
-            display: flex; align-items: center; justify-content: center; 
-            transition: opacity 0.3s;
-        }
+        /* Poster */
+        .mp-poster { z-index: 5; background: #000 no-repeat center/cover; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s; }
         
-        /* UI Layer */
-        .mp-ui { 
-            z-index: 10; display: flex; flex-direction: column; justify-content: space-between; 
-            background: linear-gradient(0deg, rgba(0,0,0,0.95), transparent 35%, rgba(0,0,0,0.8)); 
-            transition: opacity 0.3s; opacity: 1; 
-        }
+        /* UI */
+        .mp-ui { z-index: 10; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(0deg, rgba(0,0,0,0.95), transparent 35%, rgba(0,0,0,0.8)); transition: opacity 0.3s; opacity: 1; }
         .mp-ui.mp-hidden { opacity: 0; pointer-events: none; }
         
-        /* Big Play Button */
-        .mp-big-play { 
-            width: 70px; height: 70px; background: rgba(0,0,0,0.4); 
-            border: 2px solid rgba(255,255,255,0.8); border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            backdrop-filter: blur(5px); cursor: pointer; transition: transform 0.2s; 
-            z-index: 6;
-        }
+        /* Components */
+        .mp-big-play { width: 70px; height: 70px; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); cursor: pointer; transition: transform 0.2s; z-index: 6; }
         .mp-big-play:hover { background: #e50914; border-color: #e50914; transform: scale(1.1); }
-
-        /* Spinner */
-        .mp-spinner { 
-            width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.1); 
-            border-top: 3px solid #e50914; border-radius: 50%; 
-            animation: spin 0.8s infinite linear; 
-            position: absolute; top:50%; left:50%; margin:-25px; 
-            display: none; z-index: 20; 
-        }
-
-        /* Controls */
+        .mp-spinner { width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #e50914; border-radius: 50%; animation: spin 0.8s infinite linear; position: absolute; top:50%; left:50%; margin:-25px; display: none; z-index: 20; }
         .mp-btn { background: none; border: none; color: #fff; cursor: pointer; padding: 6px; display: flex; opacity: 0.9; transition: 0.2s; }
         .mp-btn:hover { color: #e50914; transform: scale(1.1); opacity: 1; }
-        .mp-icon { font-size: 28px; }
         
+        /* Layouts */
         .mp-btm { padding: 15px; display: flex; flex-direction: column; gap: 8px; }
         .mp-row { display: flex; justify-content: space-between; align-items: center; }
         .mp-grp { display: flex; align-items: center; gap: 8px; }
-        .mp-time { font-size: 11px; opacity: 0.8; font-family: monospace; color:white; margin-left:5px; }
         .mp-title { color: white; font-size: 14px; font-weight: 600; text-shadow: 0 2px 4px black; padding: 20px; max-width: 80%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .mp-time { font-size: 11px; opacity: 0.8; font-family: monospace; color:white; margin-left:5px; }
 
         /* Seek Bar */
         .mp-seek-wrap { width: 100%; height: 15px; display: flex; align-items: center; cursor: pointer; position: relative; }
@@ -72,11 +40,13 @@
         .mp-seek-thumb { position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; left: 0%; transform: translateX(-50%); box-shadow: 0 2px 5px black; transition: 0.1s; }
         .mp-seek-wrap:hover .mp-seek-thumb { transform: translateX(-50%) scale(1.3); }
 
-        /* Double Tap & Feedback */
+        /* Interactions */
         .mp-feedback { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; z-index: 25; }
         .mp-feedback.anim { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
         .mp-tap { position: absolute; top:0; bottom:0; width: 35%; z-index: 15; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; background: radial-gradient(circle, rgba(255,255,255,0.1), transparent); transition: 0.2s; }
         .mp-tap-l { left: 0; } .mp-tap-r { right: 0; }
+        .mp-replay { position: absolute; inset: 0; z-index: 30; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; }
+        .mp-replay.visible { opacity: 1; pointer-events: auto; }
 
         /* Menus */
         .mp-overlay { position: absolute; inset: 0; z-index: 60; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; justify-content: flex-end; opacity: 0; pointer-events: none; transition: 0.3s; }
@@ -86,10 +56,6 @@
         .mp-item { padding: 12px; border-bottom: 1px solid #333; color: #ccc; cursor: pointer; display: flex; justify-content: space-between; font-size: 14px; }
         .mp-item.active { color: #e50914; font-weight: bold; }
         .mp-item.active::after { content: '✔'; }
-
-        /* Replay Screen */
-        .mp-replay { position: absolute; inset: 0; z-index: 30; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; }
-        .mp-replay.visible { opacity: 1; pointer-events: auto; }
         
         @keyframes spin { to { transform: rotate(360deg); } }
     `;
@@ -114,19 +80,30 @@
 
         extractID(src) {
             if(!src) return 'D-279L1219U';
-            if(src.length === 11) return src;
-            const m = src.match(/(?:v=|\/)([0-9A-Za-z_-]{11}).*/);
-            return m ? m[1] : src;
+            
+            // Clean spaces
+            let id = src.trim();
+
+            // 1. Check for URL patterns
+            const urlMatch = id.match(/(?:v=|\/|youtu\.be\/|embed\/)([0-9A-Za-z_-]{11})/);
+            if(urlMatch) {
+                return urlMatch[1];
+            }
+
+            // 2. If no URL, assume it is the ID itself
+            return id;
         }
 
         render() {
+            const posterUrl = `https://img.youtube.com/vi/${this.videoId}/maxresdefault.jpg`;
+            
             this.container.innerHTML = `
                 <div class="mp-container" id="box-${this.uid}">
                     <div class="mp-layer mp-video-wrap" id="v-wrap-${this.uid}">
                         <div id="yt-${this.uid}" class="mp-video"></div>
                     </div>
                     
-                    <div class="mp-layer mp-poster" id="poster-${this.uid}" style="background-image: url('https://img.youtube.com/vi/${this.videoId}/maxresdefault.jpg');">
+                    <div class="mp-layer mp-poster" id="poster-${this.uid}" style="background-image: url('${posterUrl}');">
                         <div class="mp-big-play"><span class="material-icons-round" style="font-size:40px; color:white;">play_arrow</span></div>
                     </div>
 
@@ -185,23 +162,17 @@
             const replay = c.querySelector(`#replay-${this.uid}`);
             const box = c.querySelector(`#box-${this.uid}`);
 
-            // Start Video
             const startAll = () => {
                 poster.style.display = 'none';
                 replay.classList.remove('visible');
-                c.querySelector(`#spin-${this.uid}`).style.display = 'block'; // Show Spinner immediately
+                c.querySelector(`#spin-${this.uid}`).style.display = 'block';
                 this.player.playVideo();
             };
             poster.addEventListener('click', startAll);
-            replay.addEventListener('click', () => {
-                this.player.seekTo(0);
-                startAll();
-            });
+            replay.addEventListener('click', () => { this.player.seekTo(0); startAll(); });
 
-            // Toggle Play
             c.querySelector(`#play-${this.uid}`).addEventListener('click', () => this.toggle());
 
-            // Tap & UI Toggle
             let lastTap = 0;
             box.addEventListener('click', (e) => {
                 if(poster.style.display !== 'none' || replay.classList.contains('visible')) return;
@@ -211,8 +182,7 @@
                 if(now - lastTap < 300) {
                     const width = box.offsetWidth;
                     const x = e.clientX - box.getBoundingClientRect().left;
-                    if(x < width/2) this.seek(-10, '.mp-tap-l');
-                    else this.seek(10, '.mp-tap-r');
+                    if(x < width/2) this.seek(-10, '.mp-tap-l'); else this.seek(10, '.mp-tap-r');
                 } else {
                     const ui = c.querySelector(`#ui-${this.uid}`);
                     if(ui.classList.contains('mp-hidden')) {
@@ -225,12 +195,10 @@
                 lastTap = now;
             });
 
-            // Fullscreen
             c.querySelector(`#f-btn-${this.uid}`).addEventListener('click', () => {
                 if(!document.fullscreenElement) box.requestFullscreen(); else document.exitFullscreen();
             });
 
-            // Seek Bar
             const seekWrap = c.querySelector('.mp-seek-wrap');
             seekWrap.addEventListener('click', (e) => {
                 const rect = seekWrap.getBoundingClientRect();
@@ -238,7 +206,6 @@
                 this.player.seekTo(this.player.getDuration() * pct, true);
             });
 
-            // Menus
             const qMenu = c.querySelector(`#menu-q-${this.uid}`);
             const sMenu = c.querySelector(`#menu-s-${this.uid}`);
             c.querySelector(`#q-btn-${this.uid}`).addEventListener('click', () => qMenu.classList.add('active'));
@@ -287,7 +254,7 @@
 
             if(s === YT.PlayerState.PLAYING) {
                 this.isPlaying = true;
-                vWrap.classList.add('active'); // SHOW VIDEO ONLY NOW
+                vWrap.classList.add('active');
                 btn.innerText = 'pause';
                 this.feedback('play_arrow');
                 this.loop();
