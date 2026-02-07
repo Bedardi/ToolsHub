@@ -7,19 +7,20 @@
         .mp-container { position: relative; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: 'Poppins', sans-serif; user-select: none; border-radius: 12px; aspect-ratio: 16/9; box-shadow: 0 10px 40px rgba(0,0,0,0.6); cursor: pointer; }
         .mp-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-        /* --- VIDEO (Click Through) --- */
+        /* --- VIDEO (ZOOMED TO HIDE CONTROLS) --- */
         .mp-video-wrap { z-index: 1; pointer-events: none; opacity: 0; transition: opacity 0.4s ease-in; }
         .mp-video-wrap.active { opacity: 1; }
-        .mp-video { width: 100%; height: 100%; transform: scale(1.01); border: none; pointer-events: none; } 
+        
+        /* FIX: Scale increased to 1.35 to push YouTube controls out of view */
+        .mp-video { width: 100%; height: 100%; transform: scale(1.35); border: none; pointer-events: none; transform-origin: center center; } 
 
-        /* --- POSTER (Clickable) --- */
+        /* --- POSTER --- */
         .mp-poster { z-index: 10; background: #000 no-repeat center/cover; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s; pointer-events: auto; }
 
-        /* --- UI LAYER (Complex Pointer Events) --- */
+        /* --- UI LAYER --- */
         .mp-ui { z-index: 20; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(0deg, rgba(0,0,0,0.9), transparent 40%, rgba(0,0,0,0.6)); transition: opacity 0.2s; opacity: 1; pointer-events: none; }
         .mp-ui.mp-hidden { opacity: 0; }
         
-        /* Only Buttons and Bars catch clicks, rest pass to Container */
         .mp-btm, .mp-seek-wrap, .mp-btn, .mp-big-play { pointer-events: auto; }
 
         /* --- CONTROLS --- */
@@ -45,7 +46,7 @@
         .mp-seek-thumb { position: absolute; width: 14px; height: 14px; background: #fff; border-radius: 50%; left: 0%; transform: translateX(-50%); box-shadow: 0 2px 5px black; transition: transform 0.1s; }
         .mp-seek-wrap:hover .mp-seek-thumb { transform: scale(1.3); }
 
-        /* --- FEEDBACK & TAPS --- */
+        /* --- FEEDBACK --- */
         .mp-feedback { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; z-index: 30; backdrop-filter: blur(4px); }
         .mp-feedback.anim { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
         
@@ -53,7 +54,7 @@
         .mp-tap-l { left: 0; background: linear-gradient(90deg, rgba(0,0,0,0.3), transparent); } 
         .mp-tap-r { right: 0; background: linear-gradient(-90deg, rgba(0,0,0,0.3), transparent); }
 
-        /* --- ADS LAYER --- */
+        /* --- ADS --- */
         .mp-ad-layer { 
             position: absolute; inset: 0; z-index: 100; background: #000; 
             display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto;
@@ -177,9 +178,8 @@
             const c = this.container;
             const box = c.querySelector(`#box-${this.uid}`);
             
-            // 1. Initial Start
             c.querySelector(`#start-btn-${this.uid}`).addEventListener('click', (e) => {
-                e.stopPropagation(); // Stop bubble
+                e.stopPropagation();
                 this.triggerAd(() => {
                     c.querySelector(`#poster-${this.uid}`).style.display = 'none';
                     c.querySelector(`#spin-${this.uid}`).style.display = 'block';
@@ -189,36 +189,23 @@
                 });
             });
 
-            // 2. Control Buttons
             c.querySelector(`#play-${this.uid}`).addEventListener('click', (e) => { e.stopPropagation(); this.toggle(); });
             c.querySelector(`#skip-${this.uid}`).addEventListener('click', (e) => { e.stopPropagation(); this.endAd(); });
             c.querySelector(`#q-btn-${this.uid}`).addEventListener('click', (e) => { e.stopPropagation(); c.querySelector(`#menu-q-${this.uid}`).classList.add('active'); c.querySelector(`#ui-${this.uid}`).classList.add('mp-hidden'); });
             c.querySelector(`#s-btn-${this.uid}`).addEventListener('click', (e) => { e.stopPropagation(); c.querySelector(`#menu-s-${this.uid}`).classList.add('active'); c.querySelector(`#ui-${this.uid}`).classList.add('mp-hidden'); });
             c.querySelector(`#f-btn-${this.uid}`).addEventListener('click', (e) => { e.stopPropagation(); if(!document.fullscreenElement) box.requestFullscreen(); else document.exitFullscreen(); });
 
-            // 3. MAIN CONTAINER CLICK (Replaces Shield)
             let lastTap = 0;
             box.addEventListener('click', (e) => {
-                // IGNORE if ad is playing or video hasn't started
                 if(!this.hasStarted || this.isAdPlaying) return;
-
-                // IGNORE if clicked on Buttons, Menus, or Poster
-                if(e.target.closest('.mp-btn') || 
-                   e.target.closest('.mp-seek-wrap') || 
-                   e.target.closest('.mp-overlay') || 
-                   e.target.closest('.mp-poster') ||
-                   e.target.closest('.mp-item')) {
-                    return;
-                }
+                if(e.target.closest('.mp-btn') || e.target.closest('.mp-seek-wrap') || e.target.closest('.mp-overlay') || e.target.closest('.mp-poster') || e.target.closest('.mp-item')) return;
 
                 const now = new Date().getTime();
                 if(now - lastTap < 300) {
-                    // Double Tap
                     const width = box.offsetWidth;
                     const x = e.clientX - box.getBoundingClientRect().left;
                     if(x < width/2) this.seek(-10, '.mp-tap-l'); else this.seek(10, '.mp-tap-r');
                 } else {
-                    // Single Tap
                     setTimeout(() => {
                         if (new Date().getTime() - lastTap >= 300) {
                              const ui = c.querySelector(`#ui-${this.uid}`);
@@ -230,7 +217,6 @@
                 lastTap = now;
             });
 
-            // 4. Seek Bar
             const seekWrap = c.querySelector('.mp-seek-wrap');
             seekWrap.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -240,7 +226,6 @@
                 this.player.seekTo(this.player.getDuration() * pct, true);
             });
 
-            // 5. Menus
             [c.querySelector(`#menu-q-${this.uid}`), c.querySelector(`#menu-s-${this.uid}`)].forEach(m => m.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if(e.target === m) m.classList.remove('active');
@@ -254,7 +239,6 @@
             }));
         }
 
-        // --- ADS ---
         triggerAd(callback) {
             this.adCallback = callback;
             this.isAdPlaying = true;
@@ -305,7 +289,6 @@
             }
         }
 
-        // --- CORE ---
         initYT() {
             if(window.YT && window.YT.Player) this.createPlayer();
             else {
