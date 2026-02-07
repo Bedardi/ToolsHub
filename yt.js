@@ -1,5 +1,5 @@
 (function() {
-    // 1. CSS Styles (Fully Restored & Upgraded)
+    // 1. CSS Styles (Fixed: Added Click Shield to block YouTube Native Overlay)
     const css = `
         @import url('https://fonts.googleapis.com/icon?family=Material+Icons+Round');
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
@@ -10,10 +10,15 @@
         /* Video & Poster */
         .mp-video-wrap { z-index: 1; pointer-events: none; opacity: 0; transition: opacity 0.4s ease-in; }
         .mp-video-wrap.active { opacity: 1; }
-        .mp-video { width: 100%; height: 100%; transform: scale(1.0); border: none; }
-        .mp-poster { z-index: 5; background: #000 no-repeat center/cover; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s; }
+        /* Pointer events none on iframe ensures clicks pass to the shield */
+        .mp-video { width: 100%; height: 100%; transform: scale(1.01); border: none; pointer-events: none; } 
+        .mp-poster { z-index: 6; background: #000 no-repeat center/cover; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s; }
         
-        /* ADS LAYER (Fixed) */
+        /* CLICK SHIELD (The Fix) */
+        /* This layer sits above video but below controls. It catches ALL clicks so YouTube doesn't see them. */
+        .mp-click-shield { position: absolute; inset: 0; z-index: 5; background: transparent; cursor: pointer; }
+
+        /* ADS LAYER */
         .mp-ad-layer { 
             position: absolute; inset: 0; z-index: 100; background: #000; 
             display: none; flex-direction: column; align-items: center; justify-content: center; 
@@ -30,13 +35,15 @@
         .mp-skip-btn.ready { pointer-events: auto; opacity: 1; background: #e50914; border-color: #e50914; }
 
         /* UI */
-        .mp-ui { z-index: 10; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(0deg, rgba(0,0,0,0.95), transparent 35%, rgba(0,0,0,0.8)); transition: opacity 0.3s; opacity: 1; pointer-events: auto; }
-        .mp-ui.mp-hidden { opacity: 0; pointer-events: none; }
-        
+        .mp-ui { z-index: 20; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(0deg, rgba(0,0,0,0.95), transparent 35%, rgba(0,0,0,0.8)); transition: opacity 0.3s; opacity: 1; pointer-events: none; }
+        .mp-ui.mp-hidden { opacity: 0; }
+        /* Enable clicks only on interactive elements inside UI */
+        .mp-btm, .mp-seek-wrap, .mp-btn { pointer-events: auto; }
+
         /* Components */
-        .mp-big-play { width: 70px; height: 70px; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); cursor: pointer; transition: transform 0.2s; z-index: 6; }
+        .mp-big-play { width: 70px; height: 70px; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); cursor: pointer; transition: transform 0.2s; z-index: 7; pointer-events: auto; }
         .mp-big-play:hover { background: #e50914; border-color: #e50914; transform: scale(1.1); }
-        .mp-spinner { width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #e50914; border-radius: 50%; animation: spin 0.8s infinite linear; position: absolute; top:50%; left:50%; margin:-25px; display: none; z-index: 20; }
+        .mp-spinner { width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #e50914; border-radius: 50%; animation: spin 0.8s infinite linear; position: absolute; top:50%; left:50%; margin:-25px; display: none; z-index: 25; }
         .mp-btn { background: none; border: none; color: #fff; cursor: pointer; padding: 8px; display: flex; opacity: 0.9; transition: 0.2s; }
         .mp-btn:hover { color: #e50914; transform: scale(1.1); opacity: 1; }
         .mp-icon { font-size: 26px; }
@@ -55,14 +62,15 @@
         .mp-seek-thumb { position: absolute; width: 14px; height: 14px; background: #fff; border-radius: 50%; left: 0%; transform: translateX(-50%); box-shadow: 0 2px 5px black; transition: transform 0.1s; }
         .mp-seek-wrap:hover .mp-seek-thumb { transform: translateX(-50%) scale(1.3); }
 
-        /* Feedback & Tap */
-        .mp-feedback { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; z-index: 25; backdrop-filter: blur(4px); }
+        /* Feedback & Tap - Raised Z-Index */
+        .mp-feedback { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; z-index: 30; backdrop-filter: blur(4px); }
         .mp-feedback.anim { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-        .mp-tap { position: absolute; top:0; bottom:0; width: 30%; z-index: 15; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; }
+        
+        .mp-tap { position: absolute; top:0; bottom:0; width: 35%; z-index: 15; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; }
         .mp-tap-l { left: 0; background: linear-gradient(90deg, rgba(0,0,0,0.3), transparent); } 
         .mp-tap-r { right: 0; background: linear-gradient(-90deg, rgba(0,0,0,0.3), transparent); }
         
-        /* Menus (Restored) */
+        /* Menus */
         .mp-overlay { position: absolute; inset: 0; z-index: 110; background: rgba(0,0,0,0.6); display: flex; flex-direction: column; justify-content: flex-end; opacity: 0; pointer-events: none; transition: 0.3s; }
         .mp-overlay.active { opacity: 1; pointer-events: auto; }
         .mp-sheet { background: #1f1f1f; width: 100%; padding: 15px; border-radius: 16px 16px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1); max-height: 70%; overflow-y: auto; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
@@ -115,6 +123,8 @@
                     <div class="mp-layer mp-video-wrap" id="v-wrap-${this.uid}">
                         <div id="yt-${this.uid}" class="mp-video"></div>
                     </div>
+
+                    <div class="mp-click-shield" id="shield-${this.uid}"></div>
                     
                     <div class="mp-ad-layer" id="ad-layer-${this.uid}">
                         <div class="mp-ad-content" id="ad-content-${this.uid}"></div>
@@ -163,18 +173,19 @@
         }
 
         fillMenus() {
-            // Quality Menu
             const qHtml = ['auto','hd1080','hd720','large','medium','small'].map(q => `<div class="mp-item ${q=='auto'?'active':''}" data-val="${q}">${q.toUpperCase()}</div>`).join('');
             this.container.querySelector(`#list-q-${this.uid}`).innerHTML = `<div style="font-weight:bold;color:white;margin-bottom:15px;font-size:16px;">Quality</div>` + qHtml;
             
-            // Speed Menu
             const sHtml = [0.5, 1, 1.25, 1.5, 2].map(s => `<div class="mp-item ${s==1?'active':''}" data-val="${s}">${s}x Normal</div>`).join('');
             this.container.querySelector(`#list-s-${this.uid}`).innerHTML = `<div style="font-weight:bold;color:white;margin-bottom:15px;font-size:16px;">Playback Speed</div>` + sHtml;
         }
 
         events() {
             const c = this.container;
-            const box = c.querySelector(`#box-${this.uid}`);
+            
+            // NOTE: Event listener attached to the SHIELD, not the box.
+            // This ensures clicks are caught before hitting the iframe.
+            const shield = c.querySelector(`#shield-${this.uid}`);
             
             // 1. Initial Start
             c.querySelector(`#start-btn-${this.uid}`).addEventListener('click', () => {
@@ -193,23 +204,30 @@
             // 3. Skip Ad
             c.querySelector(`#skip-${this.uid}`).addEventListener('click', () => this.endAd());
 
-            // 4. Double Tap & UI Toggle
+            // 4. Double Tap Logic (Attached to Shield)
             let lastTap = 0;
-            box.addEventListener('click', (e) => {
-                if(!this.hasStarted || this.isAdPlaying) return; // Ignore if ad playing or not started
-                if(e.target.closest('.mp-btn') || e.target.closest('.mp-seek-wrap') || e.target.closest('.mp-overlay')) return;
+            shield.addEventListener('click', (e) => {
+                if(!this.hasStarted || this.isAdPlaying) return; 
+                
+                // Prevent click from propagating down (Extra safety)
+                e.stopPropagation();
 
                 const now = new Date().getTime();
                 if(now - lastTap < 300) {
-                    // Double Tap Logic
-                    const width = box.offsetWidth;
-                    const x = e.clientX - box.getBoundingClientRect().left;
+                    // Double Tap Detected
+                    const width = shield.offsetWidth;
+                    const x = e.clientX - shield.getBoundingClientRect().left;
                     if(x < width/2) this.seek(-10, '.mp-tap-l'); else this.seek(10, '.mp-tap-r');
                 } else {
-                    // Toggle UI
-                    const ui = c.querySelector(`#ui-${this.uid}`);
-                    ui.classList.toggle('mp-hidden');
-                    if(!ui.classList.contains('mp-hidden') && this.isPlaying) this.hideUiDelay();
+                    // Single Tap - Toggle UI
+                    // Wait briefly to see if it becomes a double tap
+                    setTimeout(() => {
+                        if (new Date().getTime() - lastTap >= 300) {
+                             const ui = c.querySelector(`#ui-${this.uid}`);
+                             ui.classList.toggle('mp-hidden');
+                             if(!ui.classList.contains('mp-hidden') && this.isPlaying) this.hideUiDelay();
+                        }
+                    }, 305);
                 }
                 lastTap = now;
             });
@@ -225,6 +243,7 @@
 
             // 6. Fullscreen
             c.querySelector(`#f-btn-${this.uid}`).addEventListener('click', () => {
+                const box = c.querySelector(`#box-${this.uid}`);
                 if(!document.fullscreenElement) box.requestFullscreen(); else document.exitFullscreen();
             });
 
@@ -246,7 +265,7 @@
             }));
         }
 
-        // --- ADS SYSTEM (FIXED) ---
+        // --- ADS ---
         triggerAd(callback) {
             this.adCallback = callback;
             this.isAdPlaying = true;
@@ -257,11 +276,10 @@
             const adContent = this.container.querySelector(`#ad-content-${this.uid}`);
             adLayer.classList.add('active');
 
-            // IMPORTANT: Inject Script Dynamically so Ad Loads Every Time
             adContent.innerHTML = `<div class="mista-ad" data-cat="Entertainment" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">Loading Ad...</div>`;
             const s = document.createElement('script');
             s.type = 'module';
-            s.src = "https://MistaFy.pages.dev/ads.js?" + Math.random(); // Cache Buster
+            s.src = "https://MistaFy.pages.dev/ads.js?" + Math.random();
             adContent.appendChild(s);
 
             let count = 5;
@@ -282,7 +300,7 @@
 
         endAd() {
             this.container.querySelector(`#ad-layer-${this.uid}`).classList.remove('active');
-            this.container.querySelector(`#ad-content-${this.uid}`).innerHTML = ""; // Cleanup
+            this.container.querySelector(`#ad-content-${this.uid}`).innerHTML = "";
             this.isAdPlaying = false;
             if(this.adCallback) this.adCallback();
         }
@@ -314,7 +332,7 @@
         createPlayer() {
             this.player = new YT.Player(`yt-${this.uid}`, {
                 videoId: this.videoId,
-                playerVars: { controls:0, rel:0, playsinline:1, origin:window.location.origin, modestbranding:1 },
+                playerVars: { controls:0, rel:0, playsinline:1, origin:window.location.origin, modestbranding:1, iv_load_policy:3, disablekb:1 },
                 events: { 'onStateChange': (e) => this.stateChange(e) }
             });
         }
@@ -333,7 +351,6 @@
                 btn.innerText = 'pause';
                 this.loop();
                 this.hideUiDelay();
-                // Initialize timer on first play if not set
                 if(this.lastAdTime === 0) this.lastAdTime = Date.now() / 1000;
             } else if (s === YT.PlayerState.PAUSED) {
                 this.isPlaying = false;
