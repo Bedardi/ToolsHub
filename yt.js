@@ -1,295 +1,620 @@
 (function() {
+    // #1. ULTIMATE M3 PLAYER CSS
     const css = `
         @import url('https://fonts.googleapis.com/icon?family=Material+Icons+Round');
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-        .mp-container { position: relative; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: 'Poppins', sans-serif; user-select: none; border-radius: 12px; aspect-ratio: 16/9; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
-        .mp-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+        :root {
+            --m3-surface: #1C1B1F;
+            --m3-on-surface: #E6E1E5;
+            --m3-primary: #D0BCFF;
+            --m3-secondary: #CCC2DC;
+            --m3-tertiary: #EFB8C8;
+            --m3-outline: #938F99;
+            --m3-error: #F2B8B5;
+            --m3-success: #67D974;
+        }
 
-        .mp-video-wrap { z-index: 1; pointer-events: none; opacity: 0; transition: opacity 0.4s ease-in; }
-        .mp-video-wrap.active { opacity: 1; }
-        .mp-video { width: 100%; height: 100%; transform: scale(1.6); border: none; }
+        .mp-container { 
+            position: relative; width: 100%; background: #000; 
+            overflow: hidden; font-family: 'Roboto', sans-serif; 
+            border-radius: 28px; aspect-ratio: 16/9; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            touch-action: none; user-select: none;
+            cursor: var(--mp-cursor, default);
+        }
+        .mp-container.mp-hide-cursor { cursor: none; }
 
-        .mp-ad-layer { z-index: 100; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
-        .mp-ad-layer.active { display: flex; }
-        .mp-ad-slot { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        .mp-skip-btn { position: absolute; bottom: 30px; right: 20px; background: #e50914; color: #fff; border: none; padding: 8px 24px; border-radius: 4px; font-size: 13px; font-weight: 700; text-transform: uppercase; cursor: pointer; opacity: 0.5; pointer-events: none; transition: 0.3s; }
-        .mp-skip-btn.ready { opacity: 1; pointer-events: auto; }
+        /* Core Layers */
+        .mp-layer { position: absolute; inset: 0; width: 100%; height: 100%; display: flex; }
+        .mp-video-wrap { z-index: 1; opacity: 0; transition: opacity 0.6s ease; pointer-events: none; }
+        .mp-video-wrap.active { opacity: 1; pointer-events: auto; }
+        .mp-video { width: 100%; height: 100%; transform: scale(1.05); }
 
-        .mp-poster { z-index: 5; background: #000 no-repeat center/cover; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s; }
-        .mp-ui { z-index: 10; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(0deg, rgba(0,0,0,0.95), transparent 35%, rgba(0,0,0,0.8)); transition: opacity 0.3s; opacity: 1; }
-        .mp-ui.mp-hidden { opacity: 0; pointer-events: none; }
+        /* M3 UI Overlay */
+        .mp-ui { 
+            z-index: 10; background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, transparent 60%, rgba(0,0,0,0.7) 100%);
+            flex-direction: column; justify-content: space-between;
+            opacity: 1; transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .mp-ui.mp-hidden { opacity: 0; pointer-events: none; transform: translateY(10px); }
 
-        .mp-big-play { width: 70px; height: 70px; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); cursor: pointer; transition: transform 0.2s; z-index: 6; }
-        .mp-big-play:hover { background: #e50914; border-color: #e50914; transform: scale(1.1); }
-        .mp-spinner { width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #e50914; border-radius: 50%; animation: spin 0.8s infinite linear; position: absolute; top:50%; left:50%; margin:-25px; display: none; z-index: 20; }
-        .mp-btn { background: none; border: none; color: #fff; cursor: pointer; padding: 6px; display: flex; opacity: 0.9; transition: 0.2s; }
-        .mp-btn:hover { color: #e50914; transform: scale(1.1); opacity: 1; }
+        /* Top Bar */
+        .mp-top-bar { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .mp-title { color: var(--m3-on-surface); font-size: 1.1rem; font-weight: 500; max-width: 70%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
-        .mp-btm { padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        /* Controls Group */
+        .mp-controls-bottom { padding: 0 20px 20px 20px; }
         .mp-row { display: flex; justify-content: space-between; align-items: center; }
         .mp-grp { display: flex; align-items: center; gap: 8px; }
-        .mp-title { color: white; font-size: 14px; font-weight: 600; text-shadow: 0 2px 4px black; padding: 20px; max-width: 80%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-        .mp-time { font-size: 11px; opacity: 0.8; font-family: monospace; color:white; margin-left:5px; }
 
-        /* Updated Seek Bar Styles */
-        .mp-seek-wrap { width: 100%; height: 20px; display: flex; align-items: center; cursor: pointer; position: relative; pointer-events: auto; }
+        /* Buttons */
+        .mp-btn { 
+            background: none; border: none; color: white; cursor: pointer; 
+            width: 48px; height: 48px; border-radius: 24px; transition: background 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .mp-btn:hover { background: rgba(255,255,255,0.1); }
+        .mp-btn .material-icons-round { font-size: 28px; }
+
+        /* Time Display */
+        .mp-time { color: var(--m3-on-surface); font-size: 0.85rem; margin-left: 8px; font-variant-numeric: tabular-nums; opacity: 0.9; }
+
+        /* M3 Seekbar */
+        .mp-seek-wrap { 
+            width: 100%; height: 28px; display: flex; align-items: center; cursor: pointer; 
+            position: relative; margin-bottom: 8px; z-index: 20;
+        }
         .mp-seek-bg { position: absolute; width: 100%; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; }
-        .mp-seek-fill { position: absolute; height: 4px; background: #e50914; border-radius: 10px; width: 0%; }
-        .mp-seek-thumb { position: absolute; width: 14px; height: 14px; background: #fff; border-radius: 50%; left: 0%; transform: translate(-50%, 0%); box-shadow: 0 2px 5px black; transition: transform 0.1s; }
-        .mp-seek-wrap.dragging .mp-seek-thumb { transform: translate(-50%, 0%) scale(1.4); }
+        .mp-buffer-bar { position: absolute; height: 4px; background: rgba(255,255,255,0.3); border-radius: 10px; width: 0%; transition: width 0.3s; }
+        .mp-seek-fill { position: absolute; height: 4px; background: var(--m3-primary); border-radius: 10px; width: 0%; }
+        .mp-seek-thumb { 
+            position: absolute; width: 18px; height: 18px; background: var(--m3-primary); 
+            border-radius: 50%; left: 0%; transform: translateX(-50%) scale(0); 
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.6);
+        }
+        .mp-seek-wrap:hover .mp-seek-thumb, .mp-seek-wrap.dragging .mp-seek-thumb { transform: translateX(-50%) scale(1); }
+        .mp-seek-wrap:hover .mp-seek-bg, .mp-seek-wrap:hover .mp-seek-fill, .mp-seek-wrap:hover .mp-buffer-bar { height: 6px; }
 
-        .mp-feedback { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; z-index: 25; }
-        .mp-feedback.anim { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-        .mp-tap { position: absolute; top:0; bottom:0; width: 35%; z-index: 15; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; background: radial-gradient(circle, rgba(255,255,255,0.1), transparent); transition: 0.2s; }
-        .mp-tap-l { left: 0; }
-        .mp-tap-r { right: 0; }
-        .mp-replay { position: absolute; inset: 0; z-index: 30; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; }
-        .mp-replay.visible { opacity: 1; pointer-events: auto; }
+        /* Settings Bottom Sheet */
+        .mp-settings-sheet {
+            position: absolute; bottom: 0; left: 0; right: 0; background: #2B2930;
+            border-radius: 28px 28px 0 0; padding: 20px; z-index: 100; max-height: 80vh;
+            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5); overflow-y: auto;
+        }
+        .mp-settings-sheet.active { transform: translateY(0); }
+        .mp-settings-title { color: var(--m3-on-surface); font-weight: 700; font-size: 1.2rem; margin-bottom: 20px; padding-left: 10px; }
+        .mp-setting-group { margin-bottom: 24px; }
+        .mp-setting-label { color: var(--m3-outline); font-size: 0.9rem; margin-bottom: 10px; padding-left: 10px; }
+        .mp-setting-item {
+            padding: 14px 20px; border-radius: 16px; color: var(--m3-on-surface); cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;
+            transition: background 0.2s; font-size: 0.95rem;
+        }
+        .mp-setting-item:hover { background: rgba(208, 188, 255, 0.1); }
+        .mp-setting-item.selected { background: var(--m3-primary); color: #381E72; font-weight: bold; }
+        .mp-setting-item .material-icons-round { color: inherit; font-size: 20px; margin-right: 8px; }
 
-        .mp-overlay { position: absolute; inset: 0; z-index: 60; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; justify-content: flex-end; opacity: 0; pointer-events: none; transition: 0.3s; }
-        .mp-overlay.active { opacity: 1; pointer-events: auto; }
-        .mp-sheet { background: #151515; width: 100%; padding: 15px; border-radius: 20px 20px 0 0; transform: translateY(100%); transition: transform 0.3s; max-height: 60%; overflow-y: auto; }
-        .mp-overlay.active .mp-sheet { transform: translateY(0); }
-        .mp-item { padding: 12px; border-bottom: 1px solid #333; color: #ccc; cursor: pointer; display: flex; justify-content: space-between; font-size: 14px; }
-        .mp-item.active { color: #e50914; font-weight: bold; }
-        .mp-item.active::after { content: '✔'; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        /* Volume Slider */
+        .mp-volume-slider-wrap { display: flex; align-items: center; gap: 10px; padding: 10px; }
+        .mp-volume-slider { flex-grow: 1; height: 8px; appearance: none; background: rgba(255,255,255,0.2); border-radius: 4px; }
+        .mp-volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+            background: var(--m3-primary); cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+        }
+        .mp-volume-slider::-moz-range-thumb {
+            width: 18px; height: 18px; border-radius: 50%;
+            background: var(--m3-primary); cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+        }
+        .mp-volume-value { color: var(--m3-on-surface); font-size: 0.9rem; width: 40px; text-align: right; }
+
+        /* Gesture Indicators (Pills) */
+        .mp-gesture-pill {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(43, 41, 48, 0.9); color: var(--m3-primary);
+            padding: 10px 20px; border-radius: 24px; display: flex; align-items: center;
+            gap: 10px; font-size: 1rem; opacity: 0; transition: opacity 0.3s, transform 0.3s; z-index: 100;
+        }
+        .mp-brightness-overlay {
+            position: absolute; inset: 0; background: black; opacity: 0; pointer-events: none; z-index: 5;
+        }
+
+        /* Double Tap Hints */
+        .mp-tap-hint {
+            position: absolute; top: 0; width: 35%; height: 100%; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s, transform 0.3s; z-index: 5; color: white;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+        }
+        .mp-tap-hint span:first-child { font-size: 60px; }
+        .mp-tap-hint span:last-child { font-size: 1.2rem; font-weight: 500; margin-top: 5px; }
+        .mp-tap-hint.active { opacity: 1; transform: scale(1.1); }
+        
+        /* Loader */
+        .mp-loader {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 60px; height: 60px; border: 5px solid rgba(255,255,255,0.1);
+            border-top-color: var(--m3-primary); border-radius: 50%; animation: spin 0.8s infinite linear;
+            display: none; z-index: 30;
+        }
+        @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
     `;
 
-    if(!document.getElementById('mista-css')) {
-        const s = document.createElement('style');
-        s.id = 'mista-css';
-        s.innerHTML = css;
-        document.head.appendChild(s);
+    // #2. IndexedDB for Persistence (Re-using the excellent MistaDB)
+    class MistaDB {
+        constructor() { this.dbName = "MistaPlayerDB"; this.version = 1; }
+        async init() {
+            return new Promise((res) => {
+                let req = indexedDB.open(this.dbName, this.version);
+                req.onupgradeneeded = (e) => { 
+                    let db = e.target.result;
+                    if (!db.objectStoreNames.contains("progress")) db.createObjectStore("progress");
+                    if (!db.objectStoreNames.contains("settings")) db.createObjectStore("settings");
+                };
+                req.onsuccess = (e) => { this.db = e.target.result; res(); };
+            });
+        }
+        async set(store, id, val) { 
+            if(!this.db) return;
+            let tx = this.db.transaction(store, "readwrite");
+            tx.objectStore(store).put(val, id);
+        }
+        async get(store, id) {
+            return new Promise((res) => {
+                if(!this.db) return res(null);
+                let tx = this.db.transaction(store, "readonly");
+                let req = tx.objectStore(store).get(id);
+                req.onsuccess = () => res(req.result);
+            });
+        }
     }
 
+    // Load CSS once
+    if(!document.getElementById('m3-ott-style')) {
+        const s = document.createElement('style'); s.id='m3-ott-style'; s.innerHTML=css; document.head.appendChild(s);
+    }
+
+    // #3. The ULTIMATE MistaPlayer Class
     class MistaPlayer {
         constructor(el) {
             this.container = el;
-            this.rawSource = el.getAttribute('data-vid');
-            this.videoId = this.extractID(this.rawSource);
-            this.uid = Math.random().toString(36).substr(2, 9);
-            this.player = null;
+            this.vid = this.extractID(el.getAttribute('data-vid'));
+            this.uid = Math.random().toString(36).substr(2, 5); // Unique ID for elements
+            this.db = new MistaDB();
+
+            this.player = null; // YouTube Player instance
             this.isPlaying = false;
-            this.isDragging = false; 
-            this.adWatched = false;
-            this.timer = null;
+            this.isDragging = false; // For seekbar
+            this.isGestureActive = false; // For mobile gestures
+            this.resumeTime = 0; // Where to resume after quality change
+            this.currentVolume = 100;
+            this.currentBrightness = 100; // 0-100, 100 is full brightness
+
+            // Default & Persistent Settings
+            this.settings = {
+                quality: 'default',
+                speed: 1
+            };
+            
+            this.uiTimeout = null; // For auto-hide UI
+            this.gesturePillTimeout = null; // For gesture feedback pill
+
+            this.init();
+        }
+
+        extractID(s) { 
+            const m = s.match(/(?:v=|\/|youtu\.be\/|embed\/)([0-9A-Za-z_-]{11})/); 
+            return m ? m[1] : s; 
+        }
+
+        async init() {
+            await this.db.init();
+            await this.loadPersistentSettings();
             this.render();
-            this.initYT();
+            this.setupYT();
         }
 
-        extractID(src) {
-            if(!src) return 'ScMzIvxBSi4';
-            let id = src.trim();
-            const urlMatch = id.match(/(?:v=|\/|youtu\.be\/|embed\/)([0-9A-Za-z_-]{11})/);
-            if(urlMatch) { return urlMatch[1]; }
-            return id;
+        async loadPersistentSettings() {
+            const savedProgress = await this.db.get('progress', this.vid);
+            if(savedProgress) this.resumeTime = savedProgress;
+
+            const savedSettings = await this.db.get('settings', 'global');
+            if(savedSettings) {
+                this.settings.quality = savedSettings.quality || 'default';
+                this.settings.speed = savedSettings.speed || 1;
+            }
         }
 
+        // RENDER function (The heart of the UI)
         render() {
-            const posterUrl = `https://img.youtube.com/vi/${this.videoId}/maxresdefault.jpg`;
             this.container.innerHTML = `
                 <div class="mp-container" id="box-${this.uid}">
-                    <div class="mp-layer mp-video-wrap" id="v-wrap-${this.uid}">
-                        <div id="yt-${this.uid}" class="mp-video"></div>
+                    <div class="mp-brightness-overlay" id="br-overlay-${this.uid}"></div>
+                    <div class="mp-layer mp-video-wrap" id="video-wrap-${this.uid}"><div id="yt-player-${this.uid}" class="mp-video"></div></div>
+                    
+                    <div class="mp-loader" id="loader-${this.uid}"></div>
+                    <div class="mp-gesture-pill" id="gesture-pill-${this.uid}">
+                        <span class="material-icons-round">volume_up</span><span class="val">100%</span>
                     </div>
-                    <div class="mp-layer mp-ad-layer" id="ad-layer-${this.uid}">
-                        <div class="mp-ad-slot" id="ad-slot-${this.uid}"></div>
-                        <button class="mp-skip-btn" id="skip-${this.uid}">Skip Ad</button>
-                    </div>
-                    <div class="mp-layer mp-poster" id="poster-${this.uid}" style="background-image: url('${posterUrl}');">
-                        <div class="mp-big-play"><span class="material-icons-round" style="font-size:40px; color:white;">play_arrow</span></div>
-                    </div>
-                    <div class="mp-replay" id="replay-${this.uid}">
-                        <div class="mp-big-play"><span class="material-icons-round" style="font-size:40px; color:white;">replay</span></div>
-                        <div style="color:white; margin-top:10px; font-weight:bold;">Watch Again</div>
-                    </div>
-                    <div class="mp-spinner" id="spin-${this.uid}"></div>
-                    <div class="mp-feedback" id="feed-${this.uid}"></div>
-                    <div class="mp-tap mp-tap-l"><span class="material-icons-round" style="color:white; font-size:40px;">fast_rewind</span></div>
-                    <div class="mp-tap mp-tap-r"><span class="material-icons-round" style="color:white; font-size:40px;">fast_forward</span></div>
-                    <div class="mp-layer mp-ui mp-hidden" id="ui-${this.uid}">
-                        <div class="mp-title">Loading...</div>
-                        <div class="mp-btm">
+
+                    <div class="mp-tap-hint" style="left:0;" id="tap-l-${this.uid}"><span class="material-icons-round">fast_rewind</span><span>-10s</span></div>
+                    <div class="mp-tap-hint" style="right:0;" id="tap-r-${this.uid}"><span class="material-icons-round">fast_forward</span><span>+10s</span></div>
+
+                    <div class="mp-layer mp-ui" id="ui-${this.uid}">
+                        <div class="mp-top-bar">
+                            <div class="mp-title" id="title-${this.uid}">Loading Video...</div>
+                            <button class="mp-btn" id="pip-btn-${this.uid}"><span class="material-icons-round">picture_in_picture_alt</span></button>
+                        </div>
+                        
+                        <div class="mp-controls-bottom">
                             <div class="mp-seek-wrap" id="seek-wrap-${this.uid}">
                                 <div class="mp-seek-bg"></div>
-                                <div class="mp-seek-fill"></div>
-                                <div class="mp-seek-thumb"></div>
+                                <div class="mp-buffer-bar" id="buffer-bar-${this.uid}"></div>
+                                <div class="mp-seek-fill" id="seek-fill-${this.uid}"></div>
+                                <div class="mp-seek-thumb" id="seek-thumb-${this.uid}"></div>
                             </div>
                             <div class="mp-row">
                                 <div class="mp-grp">
-                                    <button class="mp-btn" id="play-${this.uid}"><span class="material-icons-round mp-icon">play_arrow</span></button>
-                                    <span class="mp-time" id="time-${this.uid}">0:00 / 0:00</span>
+                                    <button class="mp-btn" id="play-btn-${this.uid}"><span class="material-icons-round">play_arrow</span></button>
+                                    <span class="mp-time" id="time-display-${this.uid}">0:00 / 0:00</span>
                                 </div>
                                 <div class="mp-grp">
-                                    <button class="mp-btn" id="q-btn-${this.uid}"><span class="material-icons-round mp-icon">high_quality</span></button>
-                                    <button class="mp-btn" id="s-btn-${this.uid}"><span class="material-icons-round mp-icon">speed</span></button>
-                                    <button class="mp-btn" id="f-btn-${this.uid}"><span class="material-icons-round mp-icon">fullscreen</span></button>
+                                    <button class="mp-btn" id="settings-btn-${this.uid}"><span class="material-icons-round">settings</span></button>
+                                    <button class="mp-btn" id="fullscreen-btn-${this.uid}"><span class="material-icons-round">fullscreen</span></button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="mp-overlay" id="menu-q-${this.uid}"><div class="mp-sheet" id="list-q-${this.uid}"></div></div>
-                    <div class="mp-overlay" id="menu-s-${this.uid}"><div class="mp-sheet" id="list-s-${this.uid}"></div></div>
+
+                    <div class="mp-settings-sheet" id="settings-sheet-${this.uid}">
+                        <div class="mp-settings-title">Playback Settings</div>
+
+                        <div class="mp-setting-group">
+                            <div class="mp-setting-label">Quality</div>
+                            <div class="mp-setting-item" data-setting="quality" data-val="auto">Auto</div>
+                            <div class="mp-setting-item" data-setting="quality" data-val="hd1080">1080p (Full HD)</div>
+                            <div class="mp-setting-item" data-setting="quality" data-val="hd720">720p (HD)</div>
+                            <div class="mp-setting-item" data-setting="quality" data-val="large">480p</div>
+                            <div class="mp-setting-item" data-setting="quality" data-val="medium">360p</div>
+                        </div>
+
+                        <div class="mp-setting-group">
+                            <div class="mp-setting-label">Playback Speed</div>
+                            <div class="mp-setting-item" data-setting="speed" data-val="0.5">0.5x</div>
+                            <div class="mp-setting-item" data-setting="speed" data-val="1">Normal (1x)</div>
+                            <div class="mp-setting-item" data-setting="speed" data-val="1.5">1.5x</div>
+                            <div class="mp-setting-item" data-setting="speed" data-val="2">2x</div>
+                        </div>
+
+                        <div class="mp-setting-group">
+                            <div class="mp-setting-label">Volume</div>
+                            <div class="mp-volume-slider-wrap">
+                                <span class="material-icons-round" id="volume-icon-${this.uid}">volume_up</span>
+                                <input type="range" min="0" max="100" value="100" class="mp-volume-slider" id="volume-slider-${this.uid}">
+                                <span class="mp-volume-value" id="volume-value-${this.uid}">100%</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
-            this.fillMenus();
-            this.events();
-            this.getTitle();
+            this.applyInitialSettingsToUI();
+            this.bindEvents();
         }
 
-        fillMenus() {
-            const qHtml = ['auto','hd1080','hd720','large','medium'].map(q => `<div class="mp-item ${q=='auto'?'active':''}" data-val="${q}">${q.toUpperCase()}</div>`).join('');
-            this.container.querySelector(`#list-q-${this.uid}`).innerHTML = `<div style="font-weight:bold;color:white;margin-bottom:15px;">Quality</div>` + qHtml;
-            const sHtml = [0.5,1,1.5,2].map(s => `<div class="mp-item ${s==1?'active':''}" data-val="${s}">${s}x</div>`).join('');
-            this.container.querySelector(`#list-s-${this.uid}`).innerHTML = `<div style="font-weight:bold;color:white;margin-bottom:15px;">Speed</div>` + sHtml;
+        applyInitialSettingsToUI() {
+            const sheet = this.container.querySelector(`#settings-sheet-${this.uid}`);
+            // Apply Quality
+            sheet.querySelector(`.mp-setting-item[data-setting="quality"][data-val="${this.settings.quality}"]`).classList.add('selected');
+            // Apply Speed
+            sheet.querySelector(`.mp-setting-item[data-setting="speed"][data-val="${this.settings.speed}"]`).classList.add('selected');
+            // Apply Volume (Set default to 100%)
+            this.container.querySelector(`#volume-slider-${this.uid}`).value = this.currentVolume;
+            this.container.querySelector(`#volume-value-${this.uid}`).innerText = `${this.currentVolume}%`;
         }
 
-        playAd() {
-            const adLayer = this.container.querySelector(`#ad-layer-${this.uid}`);
-            const poster = this.container.querySelector(`#poster-${this.uid}`);
-            const skipBtn = this.container.querySelector(`#skip-${this.uid}`);
-            const adSlot = this.container.querySelector(`#ad-slot-${this.uid}`);
-            poster.style.display = 'none';
-            adLayer.classList.add('active');
-            adSlot.innerHTML = `<div class="mista-ad" data-cat="Entertainment" style="width:100%;height:100%;"></div>`;
-            const s = document.createElement('script'); s.type='module'; s.src="https://MistaFy.pages.dev/ads.js?"+Math.random();
-            adSlot.appendChild(s);
-            let count = 5;
-            skipBtn.innerText = `Skip in ${count}`;
-            skipBtn.classList.remove('ready');
-            const t = setInterval(() => { count--; if(count > 0) skipBtn.innerText = `Skip in ${count}`; else { clearInterval(t); skipBtn.innerText = "Skip Ad"; skipBtn.classList.add('ready'); } }, 1000);
-        }
-
-        events() {
-            const c = this.container;
-            const poster = c.querySelector(`#poster-${this.uid}`);
-            const replay = c.querySelector(`#replay-${this.uid}`);
-            const box = c.querySelector(`#box-${this.uid}`);
-            const adLayer = c.querySelector(`#ad-layer-${this.uid}`);
-            const skipBtn = c.querySelector(`#skip-${this.uid}`);
-            const seekWrap = c.querySelector(`#seek-wrap-${this.uid}`);
-
-            const startAll = () => { if(!this.adWatched) this.playAd(); else { poster.style.display = 'none'; replay.classList.remove('visible'); c.querySelector(`#spin-${this.uid}`).style.display = 'block'; this.player.playVideo(); } };
-
-            poster.addEventListener('click', startAll);
-            skipBtn.addEventListener('click', (e) => { e.stopPropagation(); adLayer.classList.remove('active'); this.adWatched = true; startAll(); });
-            replay.addEventListener('click', () => { this.player.seekTo(0); startAll(); });
-            c.querySelector(`#play-${this.uid}`).addEventListener('click', () => this.toggle());
-
-            // --- DRAGGABLE SEEKBAR LOGIC ---
-            const handleSeek = (e) => {
-                const rect = seekWrap.getBoundingClientRect();
-                const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-                const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-                c.querySelector('.mp-seek-fill').style.width = (pct * 100) + '%';
-                c.querySelector('.mp-seek-thumb').style.left = (pct * 100) + '%';
-                if(e.type === 'mouseup' || e.type === 'touchend') {
-                    this.player.seekTo(this.player.getDuration() * pct, true);
-                }
+        // #4. YouTube Player Setup
+        setupYT() {
+            const createPlayer = () => {
+                this.player = new YT.Player(`yt-player-${this.uid}`, {
+                    videoId: this.vid,
+                    playerVars: { 
+                        controls: 0, rel: 0, modestbranding: 1, playsinline: 1, 
+                        autoplay: 0, suggestedQuality: this.settings.quality 
+                    },
+                    events: { 
+                        onReady: (e) => this.onPlayerReady(e),
+                        onStateChange: (e) => this.onPlayerStateChange(e)
+                    }
+                });
             };
-
-            seekWrap.addEventListener('mousedown', (e) => { this.isDragging = true; seekWrap.classList.add('dragging'); handleSeek(e); });
-            seekWrap.addEventListener('touchstart', (e) => { this.isDragging = true; seekWrap.classList.add('dragging'); handleSeek(e); });
-
-            window.addEventListener('mousemove', (e) => { if(this.isDragging) handleSeek(e); });
-            window.addEventListener('touchmove', (e) => { if(this.isDragging) handleSeek(e); });
-
-            window.addEventListener('mouseup', (e) => { if(this.isDragging) { this.isDragging = false; seekWrap.classList.remove('dragging'); handleSeek(e); } });
-            window.addEventListener('touchend', (e) => { if(this.isDragging) { this.isDragging = false; seekWrap.classList.remove('dragging'); handleSeek(e); } });
-
-            // UI Show/Hide
-            let lastTap = 0;
-            box.addEventListener('click', (e) => {
-                if(poster.style.display !== 'none' || replay.classList.contains('visible') || adLayer.classList.contains('active')) return;
-                if(e.target.closest('.mp-btn') || e.target.closest('.mp-seek-wrap') || e.target.closest('.mp-overlay')) return;
-                const now = new Date().getTime();
-                if(now - lastTap < 300) {
-                    const width = box.offsetWidth;
-                    const x = e.clientX - box.getBoundingClientRect().left;
-                    if(x < width/2) this.seek(-10, '.mp-tap-l'); else this.seek(10, '.mp-tap-r');
-                } else {
-                    const ui = c.querySelector(`#ui-${this.uid}`);
-                    if(ui.classList.contains('mp-hidden')) { ui.classList.remove('mp-hidden'); if(this.isPlaying) this.hideUiDelay(); } 
-                    else if(this.isPlaying) ui.classList.add('mp-hidden');
-                }
-                lastTap = now;
-            });
-
-            c.querySelector(`#f-btn-${this.uid}`).addEventListener('click', () => { if(!document.fullscreenElement) box.requestFullscreen(); else document.exitFullscreen(); });
-
-            const qMenu = c.querySelector(`#menu-q-${this.uid}`);
-            const sMenu = c.querySelector(`#menu-s-${this.uid}`);
-            c.querySelector(`#q-btn-${this.uid}`).addEventListener('click', () => qMenu.classList.add('active'));
-            c.querySelector(`#s-btn-${this.uid}`).addEventListener('click', () => sMenu.classList.add('active'));
-
-            [qMenu, sMenu].forEach(m => m.addEventListener('click', (e) => {
-                if(e.target === m) m.classList.remove('active');
-                if(e.target.classList.contains('mp-item')) {
-                    m.querySelectorAll('.mp-item').forEach(i => i.classList.remove('active'));
-                    e.target.classList.add('active');
-                    const v = e.target.getAttribute('data-val');
-                    if(m === qMenu) this.player.setPlaybackQuality(v); else this.player.setPlaybackRate(parseFloat(v));
-                    m.classList.remove('active');
-                }
-            }));
+            if(window.YT) createPlayer(); else window.addEventListener('yt_ready', createPlayer);
         }
 
-        initYT() {
-            if(window.YT && window.YT.Player) this.createPlayer();
-            else {
-                if(!window.onYouTubeIframeAPIReady) {
-                    const t = document.createElement('script'); t.src = "https://www.youtube.com/iframe_api";
-                    document.body.appendChild(t);
-                    window.onYouTubeIframeAPIReady = () => window.dispatchEvent(new Event('yt_ready'));
-                }
-                window.addEventListener('yt_ready', () => this.createPlayer());
+        onPlayerReady(e) {
+            this.container.querySelector(`#title-${this.uid}`).innerText = this.player.getVideoData().title;
+            if(this.resumeTime > 0) this.player.seekTo(this.resumeTime, true);
+            this.player.setVolume(this.currentVolume); // Set initial volume
+            this.player.setPlaybackRate(this.settings.speed); // Set initial speed
+            this.container.querySelector(`#video-wrap-${this.uid}`).classList.add('active');
+            this.hideLoader();
+        }
+
+        onPlayerStateChange(e) {
+            const playBtnIcon = this.container.querySelector(`#play-btn-${this.uid} span`);
+            const loader = this.container.querySelector(`#loader-${this.uid}`);
+            const ui = this.container.querySelector(`#ui-${this.uid}`);
+
+            if(e.data == YT.PlayerState.PLAYING) {
+                this.isPlaying = true;
+                playBtnIcon.innerText = 'pause';
+                this.startPlayerLoop();
+                this.resetUIHideTimeout(); // Start auto-hide UI
+                loader.style.display = 'none';
+                ui.classList.remove('mp-hidden'); // Ensure UI visible when playing starts
+            } else if (e.data == YT.PlayerState.PAUSED) {
+                this.isPlaying = false;
+                playBtnIcon.innerText = 'play_arrow';
+                clearInterval(this.playerLoop);
+                this.resetUIHideTimeout(); // Show UI if paused
+                ui.classList.remove('mp-hidden');
+            } else if (e.data == YT.PlayerState.BUFFERING) {
+                loader.style.display = 'block';
+            } else if (e.data == YT.PlayerState.ENDED) {
+                this.isPlaying = false;
+                playBtnIcon.innerText = 'replay'; // Show replay icon
+                clearInterval(this.playerLoop);
+                this.container.querySelector(`#seek-fill-${this.uid}`).style.width = '100%';
+                this.container.querySelector(`#seek-thumb-${this.uid}`).style.left = '100%';
+                ui.classList.remove('mp-hidden'); // Show UI when ended
             }
         }
 
-        createPlayer() {
-            this.player = new YT.Player(`yt-${this.uid}`, { videoId: this.videoId, playerVars: { controls:0, rel:0, playsinline:1, origin:window.location.origin }, events: { 'onStateChange': (e) => this.stateChange(e) } });
-        }
+        startPlayerLoop() {
+            clearInterval(this.playerLoop);
+            this.playerLoop = setInterval(async () => {
+                const cur = this.player.getCurrentTime();
+                const dur = this.player.getDuration();
+                const buf = this.player.getVideoLoadedFraction() * 100;
+                const pct = (cur/dur) * 100;
 
-        stateChange(e) {
-            const s = e.data; const ui = this.container.querySelector(`#ui-${this.uid}`);
-            const spin = this.container.querySelector(`#spin-${this.uid}`);
-            const vWrap = this.container.querySelector(`#v-wrap-${this.uid}`);
-            const btn = this.container.querySelector(`#play-${this.uid} span`);
-            spin.style.display = 'none';
-            if(s === YT.PlayerState.PLAYING) { this.isPlaying = true; vWrap.classList.add('active'); btn.innerText = 'pause'; this.feedback('play_arrow'); this.loop(); this.hideUiDelay(); } 
-            else if (s === YT.PlayerState.PAUSED) { this.isPlaying = false; btn.innerText = 'play_arrow'; this.feedback('pause'); ui.classList.remove('mp-hidden'); clearInterval(this.timer); } 
-            else if (s === YT.PlayerState.BUFFERING) spin.style.display = 'block';
-            else if (s === YT.PlayerState.ENDED) { this.isPlaying = false; this.container.querySelector(`#replay-${this.uid}`).classList.add('visible'); ui.classList.add('mp-hidden'); }
-        }
+                this.updateSeekUI(pct, buf);
+                this.updateTimeDisplay(cur, dur);
 
-        toggle() { if(this.isPlaying) this.player.pauseVideo(); else this.player.playVideo(); }
-
-        seek(sec, sel) { this.player.seekTo(this.player.getCurrentTime() + sec, true); const el = this.container.querySelector(sel); el.style.opacity = 1; setTimeout(() => el.style.opacity = 0, 400); }
-
-        loop() {
-            clearInterval(this.timer);
-            this.timer = setInterval(() => {
-                if(this.player && this.player.getCurrentTime && !this.isDragging) {
-                    const c = this.player.getCurrentTime(); const d = this.player.getDuration();
-                    const pct = (c/d)*100;
-                    this.container.querySelector('.mp-seek-fill').style.width = pct + '%';
-                    this.container.querySelector('.mp-seek-thumb').style.left = pct + '%';
-                    const fmt = (t) => { const m=Math.floor(t/60), s=Math.floor(t%60); return `${m}:${s<10?'0':''}${s}`; };
-                    this.container.querySelector(`#time-${this.uid}`).innerText = `${fmt(c)} / ${fmt(d)}`;
-                }
+                // Save progress every 5 seconds
+                if(Math.floor(cur) % 5 === 0) await this.db.set('progress', this.vid, cur);
             }, 500);
         }
 
-        hideUiDelay() { clearTimeout(this.to); this.to = setTimeout(() => { if(this.isPlaying && !this.isDragging && !this.container.querySelector('.mp-overlay.active')) { this.container.querySelector(`#ui-${this.uid}`).classList.add('mp-hidden'); } }, 3000); }
+        updateSeekUI(playPct, bufferPct) {
+            this.container.querySelector(`#seek-fill-${this.uid}`).style.width = playPct + '%';
+            this.container.querySelector(`#seek-thumb-${this.uid}`).style.left = playPct + '%';
+            this.container.querySelector(`#buffer-bar-${this.uid}`).style.width = bufferPct + '%';
+        }
 
-        feedback(icon) { const el = this.container.querySelector(`#feed-${this.uid}`); el.innerHTML = `<span class="material-icons-round" style="color:white;font-size:40px;">${icon}</span>`; el.classList.add('anim'); setTimeout(() => el.classList.remove('anim'), 300); }
+        updateTimeDisplay(currentTime, duration) {
+            const fmt = s => new Date(s * 1000).toISOString().substr(duration >= 3600 ? 11 : 14, duration >= 3600 ? 8 : 5);
+            this.container.querySelector(`#time-display-${this.uid}`).innerText = `${fmt(currentTime)} / ${fmt(duration)}`;
+        }
 
-        async getTitle() { try { const r = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${this.videoId}`); const d = await r.json(); if(d.title) this.container.querySelector('.mp-title').innerText = d.title; } catch(e){} }
+        resetUIHideTimeout() {
+            clearTimeout(this.uiTimeout);
+            const ui = this.container.querySelector(`#ui-${this.uid}`);
+            const sheet = this.container.querySelector(`#settings-sheet-${this.uid}`);
+            const box = this.container.querySelector(`#box-${this.uid}`);
+
+            if(this.isPlaying && !sheet.classList.contains('active')) {
+                ui.classList.remove('mp-hidden');
+                box.classList.remove('mp-hide-cursor');
+                this.uiTimeout = setTimeout(() => {
+                    ui.classList.add('mp-hidden');
+                    box.classList.add('mp-hide-cursor');
+                }, 3000); // Hide UI after 3 seconds of inactivity
+            } else {
+                ui.classList.remove('mp-hidden');
+                box.classList.remove('mp-hide-cursor');
+            }
+        }
+
+        hideLoader() {
+            this.container.querySelector(`#loader-${this.uid}`).style.display = 'none';
+        }
+
+        showGesturePill(icon, valueText) {
+            const pill = this.container.querySelector(`#gesture-pill-${this.uid}`);
+            pill.querySelector('.material-icons-round').innerText = icon;
+            pill.querySelector('.val').innerText = valueText;
+            pill.style.opacity = 1;
+            clearTimeout(this.gesturePillTimeout);
+            this.gesturePillTimeout = setTimeout(() => pill.style.opacity = 0, 800);
+        }
+
+        showTapHint(id) {
+            const el = this.container.querySelector(id);
+            el.classList.add('active');
+            setTimeout(() => el.classList.remove('active'), 500);
+        }
+
+        // #5. Event Binding (All interactions here)
+        bindEvents() {
+            const c = this.container;
+            const box = c.querySelector(`#box-${this.uid}`);
+            const ui = c.querySelector(`#ui-${this.uid}`);
+            const seekWrap = c.querySelector(`#seek-wrap-${this.uid}`);
+            const settingsSheet = c.querySelector(`#settings-sheet-${this.uid}`);
+            const volumeSlider = c.querySelector(`#volume-slider-${this.uid}`);
+            const volumeIcon = c.querySelector(`#volume-icon-${this.uid}`);
+            const volumeValue = c.querySelector(`#volume-value-${this.uid}`);
+
+            // UI Interaction Reset Timer
+            box.addEventListener('mousemove', () => this.resetUIHideTimeout());
+            box.addEventListener('click', () => this.resetUIHideTimeout());
+
+            // Play/Pause Button
+            c.querySelector(`#play-btn-${this.uid}`).onclick = () => {
+                if(this.player.getPlayerState() == YT.PlayerState.PLAYING) this.player.pauseVideo();
+                else this.player.playVideo();
+            };
+
+            // Fullscreen Button
+            c.querySelector(`#fullscreen-btn-${this.uid}`).onclick = () => {
+                if(!document.fullscreenElement) box.requestFullscreen(); else document.exitFullscreen();
+            };
+
+            // Picture-in-Picture Button
+            c.querySelector(`#pip-btn-${this.uid}`).onclick = async () => {
+                if(document.pictureInPictureEnabled) {
+                    await this.player.getIframe().requestPictureInPicture();
+                } else {
+                    alert("Picture-in-Picture is not supported by your browser.");
+                }
+            };
+
+            // Seekbar Dragging / Scrubbing
+            let isSeeking = false;
+            const handleSeek = (e) => {
+                const rect = seekWrap.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const pct = Math.min(Math.max(0, x / rect.width), 1);
+                
+                this.updateSeekUI(pct * 100, this.player.getVideoLoadedFraction() * 100);
+                if(isSeeking && this.player) {
+                    this.player.seekTo(this.player.getDuration() * pct, true);
+                }
+            };
+            seekWrap.addEventListener('mousedown', (e) => { isSeeking = true; seekWrap.classList.add('dragging'); handleSeek(e); });
+            window.addEventListener('mouseup', () => { isSeeking = false; seekWrap.classList.remove('dragging'); });
+            window.addEventListener('mousemove', (e) => { if(isSeeking) handleSeek(e); });
+            seekWrap.addEventListener('touchstart', (e) => { isSeeking = true; seekWrap.classList.add('dragging'); handleSeek(e); });
+            window.addEventListener('touchend', () => { isSeeking = false; seekWrap.classList.remove('dragging'); });
+            window.addEventListener('touchmove', (e) => { if(isSeeking) handleSeek(e); });
+
+            // Unified Settings Sheet Toggle
+            c.querySelector(`#settings-btn-${this.uid}`).onclick = () => {
+                settingsSheet.classList.toggle('active');
+                this.resetUIHideTimeout(); // Keep UI visible while settings open
+            };
+            // Close settings by clicking outside or on sheet itself
+            settingsSheet.addEventListener('click', (e) => {
+                if (e.target === settingsSheet) settingsSheet.classList.remove('active');
+            });
+
+                        // Settings Items (Quality & Speed) logic continue...
+            settingsSheet.querySelectorAll('.mp-setting-item').forEach(item => {
+                item.onclick = async () => {
+                    const type = item.dataset.setting;
+                    const val = item.dataset.val;
+
+                    // UI Update
+                    settingsSheet.querySelectorAll(`.mp-setting-item[data-setting="${type}"]`).forEach(i => i.classList.remove('selected'));
+                    item.classList.add('selected');
+
+                    if (type === 'quality') {
+                        this.settings.quality = val;
+                        const curTime = this.player.getCurrentTime();
+                        this.container.querySelector(`#loader-${this.uid}`).style.display = 'block';
+                        // Force quality change by reloading video at same timestamp
+                        this.player.loadVideoById({
+                            videoId: this.vid,
+                            startSeconds: curTime,
+                            suggestedQuality: val
+                        });
+                    } else if (type === 'speed') {
+                        const speedVal = parseFloat(val);
+                        this.settings.speed = speedVal;
+                        this.player.setPlaybackRate(speedVal);
+                    }
+
+                    // Save settings globally in IndexedDB
+                    await this.db.set('settings', 'global', this.settings);
+                    setTimeout(() => settingsSheet.classList.remove('active'), 300);
+                };
+            });
+
+            // Volume Slider in Settings
+            volumeSlider.oninput = (e) => {
+                const val = e.target.value;
+                this.currentVolume = val;
+                this.player.setVolume(val);
+                volumeValue.innerText = `${val}%`;
+                volumeIcon.innerText = val == 0 ? 'volume_off' : (val < 50 ? 'volume_down' : 'volume_up');
+            };
+
+            // --- ADVANCED GESTURES (Volume, Brightness & Double Tap) ---
+            let startY = 0, startVal = 0, gType = "";
+            
+            box.addEventListener('touchstart', (e) => {
+                if (e.target.closest('.mp-btn') || e.target.closest('.mp-settings-sheet')) return;
+                
+                // Double Tap logic
+                const now = Date.now();
+                const tapInterval = now - (this.lastTap || 0);
+                if (tapInterval < 300) {
+                    const x = e.touches[0].clientX - box.getBoundingClientRect().left;
+                    if (x < box.offsetWidth / 2) {
+                        this.player.seekTo(this.player.getCurrentTime() - 10);
+                        this.showTapHint(`#tap-l-${this.uid}`);
+                    } else {
+                        this.player.seekTo(this.player.getCurrentTime() + 10);
+                        this.showTapHint(`#tap-r-${this.uid}`);
+                    }
+                    this.lastTap = 0; // Reset
+                    return;
+                }
+                this.lastTap = now;
+
+                // Swipe Gesture Start
+                startY = e.touches[0].clientY;
+                const x = e.touches[0].clientX - box.getBoundingClientRect().left;
+                gType = x < box.offsetWidth / 2 ? "brightness" : "volume";
+                
+                if (gType === "volume") startVal = this.player.getVolume();
+                else startVal = this.currentBrightness;
+                
+                this.isGestureActive = true;
+            });
+
+            box.addEventListener('touchmove', (e) => {
+                if (!this.isGestureActive) return;
+                const deltaY = startY - e.touches[0].clientY;
+                const sensitivity = 0.5; 
+                let newVal = Math.min(Math.max(0, startVal + (deltaY * sensitivity)), 100);
+
+                if (gType === "volume") {
+                    this.player.setVolume(newVal);
+                    this.currentVolume = newVal;
+                    volumeSlider.value = newVal; // Sync settings slider
+                    this.showGesturePill(newVal == 0 ? "volume_off" : "volume_up", Math.round(newVal) + "%");
+                } else {
+                    this.currentBrightness = newVal;
+                    const opacity = 1 - (newVal / 100);
+                    c.querySelector(`#br-overlay-${this.uid}`).style.opacity = opacity * 0.8; // Max 80% dimming
+                    this.showGesturePill("brightness_6", Math.round(newVal) + "%");
+                }
+            });
+
+            window.addEventListener('touchend', () => { this.isGestureActive = false; });
+        }
     }
 
-    const init = () => { document.querySelectorAll('.mista-embed').forEach(el => { if(!el.getAttribute('data-init')) { new MistaPlayer(el); el.setAttribute('data-init', 'true'); } }); };
-    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-    window.initMistaPlayers = init;
+    // --- INITIALIZATION ---
+    const startMista = () => {
+        document.querySelectorAll('.mista-embed').forEach(el => {
+            if (!el.dataset.init) {
+                new MistaPlayer(el);
+                el.dataset.init = "true";
+            }
+        });
+    };
+
+    if (window.YT && window.YT.Player) {
+        startMista();
+    } else {
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        document.head.appendChild(tag);
+        window.onYouTubeIframeAPIReady = () => startMista();
+    }
 })();
+
