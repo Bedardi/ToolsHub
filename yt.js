@@ -1,75 +1,53 @@
 (function() {
-    // 1. CSS Styles (Aapka Original + Ads CSS)
     const css = `
         @import url('https://fonts.googleapis.com/icon?family=Material+Icons+Round');
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
 
         .mp-container { position: relative; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: 'Poppins', sans-serif; user-select: none; border-radius: 12px; aspect-ratio: 16/9; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
         .mp-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-        /* Ghost Mode Video */
-        .mp-video-wrap { z-index: 1; pointer-events: none; opacity: 0; transition: opacity 0.4s ease-in; }
+        /* Video Masking to hide YouTube Branding */
+        .mp-video-wrap { z-index: 1; pointer-events: none; opacity: 0; transition: opacity 0.5s; overflow:hidden; }
         .mp-video-wrap.active { opacity: 1; }
-        .mp-video { width: 100%; height: 100%; transform: scale(1.6); border: none; }
+        .mp-video { width: 100%; height: 100%; transform: scale(1.35); border: none; }
 
-        /* Ads Layer Logic */
-        .mp-ad-layer { z-index: 100; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
+        /* Premium Ads Style */
+        .mp-ad-layer { z-index: 200; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .mp-ad-layer.active { display: flex; }
-        .mp-ad-slot { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        .mp-skip-btn { position: absolute; bottom: 30px; right: 20px; background: #e50914; color: #fff; border: none; padding: 8px 24px; border-radius: 4px; font-size: 13px; font-weight: 700; text-transform: uppercase; cursor: pointer; opacity: 0.5; pointer-events: none; transition: 0.3s; }
-        .mp-skip-btn.ready { opacity: 1; pointer-events: auto; }
+        .mp-ad-banner { width: 80%; height: 60%; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #555; position: relative; overflow: hidden; cursor: pointer; }
+        .mp-skip-btn { position: absolute; bottom: 20px; right: 0; background: rgba(0,0,0,0.8); color: #fff; border: 1px solid #444; padding: 8px 15px; font-size: 13px; cursor: pointer; border-right: none; }
 
-        /* Poster */
-        .mp-poster { z-index: 5; background: #000 no-repeat center/cover; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s; }
+        /* Custom Bottom Sheet (App Style) */
+        .mp-sheet-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; opacity: 0; pointer-events: none; transition: 0.3s; backdrop-filter: blur(2px); }
+        .mp-sheet-overlay.active { opacity: 1; pointer-events: auto; }
+        .mp-sheet { position: absolute; bottom: 0; left: 0; width: 100%; background: #1c1c1e; border-radius: 20px 20px 0 0; z-index: 301; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding-bottom: 20px; }
+        .mp-sheet-overlay.active .mp-sheet { transform: translateY(0); }
+        .mp-sheet-header { padding: 15px; text-align: center; color: #8e8e93; font-size: 14px; border-bottom: 1px solid #2c2c2e; }
+        .mp-sheet-item { padding: 15px 25px; color: #fff; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s; }
+        .mp-sheet-item:active { background: #2c2c2e; }
+        .mp-sheet-item .material-icons-round { font-size: 22px; color: #e50914; }
+        .mp-sheet-item.active { background: rgba(229, 9, 20, 0.1); color: #e50914; font-weight: 600; }
 
-        /* UI */
-        .mp-ui { z-index: 10; display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(0deg, rgba(0,0,0,0.95), transparent 35%, rgba(0,0,0,0.8)); transition: opacity 0.3s; opacity: 1; }
+        /* UI Elements */
+        .mp-ui { z-index: 100; background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 50%, rgba(0,0,0,0.8) 100%); transition: 0.3s; }
         .mp-ui.mp-hidden { opacity: 0; pointer-events: none; }
+        .mp-btn { background: none; border: none; color: #fff; cursor: pointer; padding: 10px; display: flex; align-items: center; }
+        
+        /* Seekbar Premium */
+        .mp-seek-wrap { width: 100%; height: 30px; display: flex; align-items: center; cursor: pointer; position: relative; z-index: 110; margin-top: -15px; }
+        .mp-seek-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.2); position: relative; }
+        .mp-seek-fill { height: 100%; background: #e50914; width: 0%; position: relative; }
+        .mp-seek-thumb { width: 12px; height: 12px; background: #e50914; border-radius: 50%; position: absolute; right: -6px; top: -4px; box-shadow: 0 0 10px rgba(229,9,20,0.5); }
 
-        /* Components */
-        .mp-big-play { width: 70px; height: 70px; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); cursor: pointer; transition: transform 0.2s; z-index: 6; }
-        .mp-big-play:hover { background: #e50914; border-color: #e50914; transform: scale(1.1); }
-        .mp-spinner { width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #e50914; border-radius: 50%; animation: spin 0.8s infinite linear; position: absolute; top:50%; left:50%; margin:-25px; display: none; z-index: 20; }
-        .mp-btn { background: none; border: none; color: #fff; cursor: pointer; padding: 6px; display: flex; opacity: 0.9; transition: 0.2s; }
-        .mp-btn:hover { color: #e50914; transform: scale(1.1); opacity: 1; }
-
-        /* Layouts */
-        .mp-btm { padding: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .mp-row { display: flex; justify-content: space-between; align-items: center; }
-        .mp-grp { display: flex; align-items: center; gap: 8px; }
-        .mp-title { color: white; font-size: 14px; font-weight: 600; text-shadow: 0 2px 4px black; padding: 20px; max-width: 80%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-        .mp-time { font-size: 11px; opacity: 0.8; font-family: monospace; color:white; margin-left:5px; }
-
-        /* Seek Bar */
-        .mp-seek-wrap { width: 100%; height: 15px; display: flex; align-items: center; cursor: pointer; position: relative; }
-        .mp-seek-bg { position: absolute; width: 100%; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; }
-        .mp-seek-fill { position: absolute; height: 4px; background: #e50914; border-radius: 10px; width: 0%; }
-        .mp-seek-thumb { position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; left: 0%; transform: translateX(-50%); box-shadow: 0 2px 5px black; transition: 0.1s; }
-        .mp-seek-wrap:hover .mp-seek-thumb { transform: translateX(-50%) scale(1.3); }
-
-        /* Interactions */
-        .mp-feedback { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; z-index: 25; }
-        .mp-feedback.anim { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-        .mp-tap { position: absolute; top:0; bottom:0; width: 35%; z-index: 15; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; background: radial-gradient(circle, rgba(255,255,255,0.1), transparent); transition: 0.2s; }
-        .mp-tap-l { left: 0; }
-        .mp-tap-r { right: 0; }
-        .mp-replay { position: absolute; inset: 0; z-index: 30; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; }
-        .mp-replay.visible { opacity: 1; pointer-events: auto; }
-
-        /* Menus */
-        .mp-overlay { position: absolute; inset: 0; z-index: 60; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; justify-content: flex-end; opacity: 0; pointer-events: none; transition: 0.3s; }
-        .mp-overlay.active { opacity: 1; pointer-events: auto; }
-        .mp-sheet { background: #151515; width: 100%; padding: 15px; border-radius: 20px 20px 0 0; transform: translateY(100%); transition: transform 0.3s; max-height: 60%; overflow-y: auto; }
-        .mp-overlay.active .mp-sheet { transform: translateY(0); }
-        .mp-item { padding: 12px; border-bottom: 1px solid #333; color: #ccc; cursor: pointer; display: flex; justify-content: space-between; font-size: 14px; }
-        .mp-item.active { color: #e50914; font-weight: bold; }
-        .mp-item.active::after { content: 'âœ”'; }
+        .mp-2x-badge { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; display: none; z-index: 150; border: 1px solid rgba(255,255,255,0.2); }
+        .mp-spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #e50914; border-radius: 50%; animation: spin 0.8s infinite linear; position: absolute; top:50%; left:50%; margin:-20px; display: none; z-index: 140; }
+        
         @keyframes spin { to { transform: rotate(360deg); } }
     `;
 
-    if(!document.getElementById('mista-css')) {
+    if(!document.getElementById('mista-premium-css')) {
         const s = document.createElement('style');
-        s.id = 'mista-css';
+        s.id = 'mista-premium-css';
         s.innerHTML = css;
         document.head.appendChild(s);
     }
@@ -77,302 +55,295 @@
     class MistaPlayer {
         constructor(el) {
             this.container = el;
-            this.rawSource = el.getAttribute('data-vid');
-            this.videoId = this.extractID(this.rawSource);
+            this.videoId = this.extractID(el.getAttribute('data-vid'));
             this.uid = Math.random().toString(36).substr(2, 9);
+            this.adFrequency = 3; // Change this to show ads after X videos
             this.player = null;
             this.isPlaying = false;
-            this.adWatched = false; // Ads logic
-            this.timer = null;
+            this.isLocked = false;
+            this.isDragging = false;
             this.render();
             this.initYT();
         }
 
         extractID(src) {
-            if(!src) return 'ScMzIvxBSi4';
-            let id = src.trim();
-            const urlMatch = id.match(/(?:v=|\/|youtu\.be\/|embed\/)([0-9A-Za-z_-]{11})/);
-            if(urlMatch) { return urlMatch[1]; }
-            return id;
+            const match = src.match(/(?:v=|\/|youtu\.be\/|embed\/)([0-9A-Za-z_-]{11})/);
+            return match ? match[1] : src;
+        }
+
+        shouldShowAd() {
+            let count = parseInt(localStorage.getItem('mp_vid_count') || '0');
+            count++;
+            localStorage.setItem('mp_vid_count', count);
+            if(count >= this.adFrequency) {
+                localStorage.setItem('mp_vid_count', '0');
+                return true;
+            }
+            return false;
         }
 
         render() {
-            const posterUrl = `https://img.youtube.com/vi/${this.videoId}/maxresdefault.jpg`;
+            const poster = `https://img.youtube.com/vi/${this.videoId}/maxresdefault.jpg`;
             this.container.innerHTML = `
                 <div class="mp-container" id="box-${this.uid}">
                     <div class="mp-layer mp-video-wrap" id="v-wrap-${this.uid}">
                         <div id="yt-${this.uid}" class="mp-video"></div>
                     </div>
 
-                    <div class="mp-layer mp-ad-layer" id="ad-layer-${this.uid}">
-                        <div class="mp-ad-slot" id="ad-slot-${this.uid}"></div>
-                        <button class="mp-skip-btn" id="skip-${this.uid}">Skip Ad</button>
-                    </div>
-
-                    <div class="mp-layer mp-poster" id="poster-${this.uid}" style="background-image: url('${posterUrl}');">
-                        <div class="mp-big-play"><span class="material-icons-round" style="font-size:40px; color:white;">play_arrow</span></div>
-                    </div>
-
-                    <div class="mp-replay" id="replay-${this.uid}">
-                        <div class="mp-big-play"><span class="material-icons-round" style="font-size:40px; color:white;">replay</span></div>
-                        <div style="color:white; margin-top:10px; font-weight:bold;">Watch Again</div>
-                    </div>
-
+                    <div class="mp-2x-badge" id="badge-2x-${this.uid}">2X Speed Active</div>
                     <div class="mp-spinner" id="spin-${this.uid}"></div>
-                    <div class="mp-feedback" id="feed-${this.uid}"></div>
 
-                    <div class="mp-tap mp-tap-l"><span class="material-icons-round" style="color:white; font-size:40px;">fast_rewind</span></div>
-                    <div class="mp-tap mp-tap-r"><span class="material-icons-round" style="color:white; font-size:40px;">fast_forward</span></div>
+                    <div class="mp-layer mp-ad-layer" id="ad-layer-${this.uid}">
+                        <div class="mp-ad-banner" onclick="window.open('https://mistafy.pages.dev','_blank')">
+                            <span class="material-icons-round" style="font-size:50px;">ads_click</span>
+                            <div style="position:absolute; bottom:10px; width:100%; text-align:center; font-size:12px;">Visit Sponsor</div>
+                        </div>
+                        <button class="mp-skip-btn" id="skip-${this.uid}">Skip in 5</button>
+                    </div>
+
+                    <div class="mp-layer mp-poster" id="poster-${this.uid}" style="background:url('${poster}') center/cover; display:flex; align-items:center; justify-content:center; z-index:50;">
+                        <div style="width:70px; height:70px; background:rgba(229,9,20,0.9); border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                            <span class="material-icons-round" style="font-size:45px; color:#fff;">play_arrow</span>
+                        </div>
+                    </div>
 
                     <div class="mp-layer mp-ui mp-hidden" id="ui-${this.uid}">
-                        <div class="mp-title">Loading...</div>
-                        <div class="mp-btm">
-                            <div class="mp-seek-wrap">
-                                <div class="mp-seek-bg"></div>
-                                <div class="mp-seek-fill"></div>
-                                <div class="mp-seek-thumb"></div>
+                        <div style="padding:15px; color:#fff; font-size:14px; font-weight:500;" id="title-${this.uid}">Loading...</div>
+                        
+                        <div style="position:absolute; bottom:0; width:100%; padding-bottom:5px;">
+                            <div class="mp-seek-wrap" id="seek-wrap-${this.uid}">
+                                <div class="mp-seek-bg"><div class="mp-seek-fill"><div class="mp-seek-thumb"></div></div></div>
                             </div>
-                            <div class="mp-row">
-                                <div class="mp-grp">
-                                    <button class="mp-btn" id="play-${this.uid}"><span class="material-icons-round mp-icon">play_arrow</span></button>
-                                    <span class="mp-time" id="time-${this.uid}">0:00 / 0:00</span>
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:0 10px;">
+                                <div style="display:flex; align-items:center;">
+                                    <button class="mp-btn" id="play-${this.uid}"><span class="material-icons-round">play_arrow</span></button>
+                                    <span style="color:#fff; font-size:11px; margin-left:5px;" id="time-${this.uid}">0:00 / 0:00</span>
                                 </div>
-                                <div class="mp-grp">
-                                    <button class="mp-btn" id="q-btn-${this.uid}"><span class="material-icons-round mp-icon">high_quality</span></button>
-                                    <button class="mp-btn" id="s-btn-${this.uid}"><span class="material-icons-round mp-icon">speed</span></button>
-                                    <button class="mp-btn" id="f-btn-${this.uid}"><span class="material-icons-round mp-icon">fullscreen</span></button>
+                                <div style="display:flex;">
+                                    <button class="mp-btn" id="lock-btn-${this.uid}"><span class="material-icons-round">lock_open</span></button>
+                                    <button class="mp-btn" id="settings-btn-${this.uid}"><span class="material-icons-round">tune</span></button>
+                                    <button class="mp-btn" id="fs-btn-${this.uid}"><span class="material-icons-round">fullscreen</span></button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mp-overlay" id="menu-q-${this.uid}"><div class="mp-sheet" id="list-q-${this.uid}"></div></div>
-                    <div class="mp-overlay" id="menu-s-${this.uid}"><div class="mp-sheet" id="list-s-${this.uid}"></div></div>
+                    <div class="mp-sheet-overlay" id="sheet-overlay-${this.uid}">
+                        <div class="mp-sheet">
+                            <div class="mp-sheet-header">Video Settings</div>
+                            <div id="sheet-content-${this.uid}"></div>
+                        </div>
+                    </div>
                 </div>
             `;
-            this.fillMenus();
             this.events();
-            this.getTitle();
         }
 
-        fillMenus() {
-            const qHtml = ['auto','hd1080','hd720','large','medium'].map(q => `<div class="mp-item ${q=='auto'?'active':''}" data-val="${q}">${q.toUpperCase()}</div>`).join('');
-            this.container.querySelector(`#list-q-${this.uid}`).innerHTML = `<div style="font-weight:bold;color:white;margin-bottom:15px;">Quality</div>` + qHtml;
-            const sHtml = [0.5,1,1.5,2].map(s => `<div class="mp-item ${s==1?'active':''}" data-val="${s}">${s}x</div>`).join('');
-            this.container.querySelector(`#list-s-${this.uid}`).innerHTML = `<div style="font-weight:bold;color:white;margin-bottom:15px;">Speed</div>` + sHtml;
-        }
+        showBottomSheet(type) {
+            const content = this.container.querySelector(`#sheet-content-${this.uid}`);
+            const overlay = this.container.querySelector(`#sheet-overlay-${this.uid}`);
+            let html = '';
 
-        // Ads Logic
-        playAd() {
-            const adLayer = this.container.querySelector(`#ad-layer-${this.uid}`);
-            const poster = this.container.querySelector(`#poster-${this.uid}`);
-            const skipBtn = this.container.querySelector(`#skip-${this.uid}`);
-            const adSlot = this.container.querySelector(`#ad-slot-${this.uid}`);
+            if(type === 'main') {
+                html = `
+                    <div class="mp-sheet-item" id="opt-quality"><span class="material-icons-round">high_quality</span> Quality</div>
+                    <div class="mp-sheet-item" id="opt-speed"><span class="material-icons-round">speed</span> Speed</div>
+                `;
+            } else if(type === 'quality') {
+                const qs = this.player.getAvailableQualityLevels();
+                html = qs.map(q => `<div class="mp-sheet-item q-set ${this.player.getPlaybackQuality()===q?'active':''}" data-val="${q}"><span class="material-icons-round">check_circle</span> ${q.toUpperCase()}</div>`).join('');
+            } else if(type === 'speed') {
+                const rates = [0.5, 1, 1.5, 2];
+                html = rates.map(r => `<div class="mp-sheet-item s-set ${this.player.getPlaybackRate()===r?'active':''}" data-val="${r}"><span class="material-icons-round">bolt</span> ${r}x Speed</div>`).join('');
+            }
 
-            poster.style.display = 'none';
-            adLayer.classList.add('active');
-            
-            // Inject Ad Script
-            adSlot.innerHTML = `<div class="mista-ad" data-cat="Entertainment" style="width:100%;height:100%;"></div>`;
-            const s = document.createElement('script'); s.type='module'; s.src="https://MistaFy.pages.dev/ads.js?"+Math.random();
-            adSlot.appendChild(s);
+            content.innerHTML = html;
+            overlay.classList.add('active');
 
-            let count = 5;
-            skipBtn.innerText = `Skip in ${count}`;
-            skipBtn.classList.remove('ready');
-
-            const t = setInterval(() => {
-                count--;
-                if(count > 0) {
-                    skipBtn.innerText = `Skip in ${count}`;
-                } else {
-                    clearInterval(t);
-                    skipBtn.innerText = "Skip Ad";
-                    skipBtn.classList.add('ready');
-                }
-            }, 1000);
+            // Listeners for Sheet Items
+            if(type === 'main') {
+                content.querySelector('#opt-quality').onclick = () => this.showBottomSheet('quality');
+                content.querySelector('#opt-speed').onclick = () => this.showBottomSheet('speed');
+            } else {
+                content.querySelectorAll('.mp-sheet-item').forEach(item => {
+                    item.onclick = () => {
+                        const val = item.getAttribute('data-val');
+                        if(type === 'quality') {
+                            const cur = this.player.getCurrentTime();
+                            this.player.setPlaybackQuality(val);
+                            this.player.seekTo(cur, true);
+                        } else {
+                            this.player.setPlaybackRate(parseFloat(val));
+                        }
+                        overlay.classList.remove('active');
+                    };
+                });
+            }
         }
 
         events() {
             const c = this.container;
-            const poster = c.querySelector(`#poster-${this.uid}`);
-            const replay = c.querySelector(`#replay-${this.uid}`);
             const box = c.querySelector(`#box-${this.uid}`);
-            const adLayer = c.querySelector(`#ad-layer-${this.uid}`);
-            const skipBtn = c.querySelector(`#skip-${this.uid}`);
+            const ui = c.querySelector(`#ui-${this.uid}`);
 
-            const startAll = () => {
-                if(!this.adWatched) {
-                    this.playAd();
+            // Play/Ad Logic
+            c.querySelector(`#poster-${this.uid}`).onclick = () => {
+                if(this.shouldShowAd()) {
+                    this.startAd();
                 } else {
-                    poster.style.display = 'none';
-                    replay.classList.remove('visible');
-                    c.querySelector(`#spin-${this.uid}`).style.display = 'block';
-                    this.player.playVideo();
+                    this.startVideo();
                 }
             };
 
-            poster.addEventListener('click', startAll);
-            
-            skipBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                adLayer.classList.remove('active');
-                this.adWatched = true;
-                startAll();
-            });
+            // Long Press 2x
+            let lpTimer;
+            box.onmousedown = box.ontouchstart = (e) => {
+                if(this.isLocked || !this.isPlaying) return;
+                lpTimer = setTimeout(() => {
+                    this.player.setPlaybackRate(2);
+                    c.querySelector(`#badge-2x-${this.uid}`).style.display = 'block';
+                }, 500);
+            };
+            const stop2x = () => {
+                clearTimeout(lpTimer);
+                if(this.player) {
+                    this.player.setPlaybackRate(1);
+                    c.querySelector(`#badge-2x-${this.uid}`).style.display = 'none';
+                }
+            };
+            box.onmouseup = box.onmouseleave = box.ontouchend = stop2x;
 
-            replay.addEventListener('click', () => { this.player.seekTo(0); startAll(); });
-            c.querySelector(`#play-${this.uid}`).addEventListener('click', () => this.toggle());
-
+            // Double Tap to Seek
             let lastTap = 0;
-            box.addEventListener('click', (e) => {
-                if(poster.style.display !== 'none' || replay.classList.contains('visible') || adLayer.classList.contains('active')) return;
-                if(e.target.closest('.mp-btn') || e.target.closest('.mp-seek-wrap') || e.target.closest('.mp-overlay')) return;
-                const now = new Date().getTime();
+            box.onclick = (e) => {
+                if(this.isLocked) return;
+                const now = Date.now();
                 if(now - lastTap < 300) {
-                    const width = box.offsetWidth;
-                    const x = e.clientX - box.getBoundingClientRect().left;
-                    if(x < width/2) this.seek(-10, '.mp-tap-l'); else this.seek(10, '.mp-tap-r');
+                    const rect = box.getBoundingClientRect();
+                    const x = (e.clientX || e.pageX) - rect.left;
+                    if(x < rect.width / 2) this.player.seekTo(this.player.getCurrentTime() - 10);
+                    else this.player.seekTo(this.player.getCurrentTime() + 10);
                 } else {
-                    const ui = c.querySelector(`#ui-${this.uid}`);
-                    if(ui.classList.contains('mp-hidden')) {
-                        ui.classList.remove('mp-hidden');
-                        if(this.isPlaying) this.hideUiDelay();
-                    } else if(this.isPlaying) {
-                        ui.classList.add('mp-hidden');
-                    }
+                    ui.classList.toggle('mp-hidden');
                 }
                 lastTap = now;
-            });
+            };
 
-            c.querySelector(`#f-btn-${this.uid}`).addEventListener('click', () => { if(!document.fullscreenElement) box.requestFullscreen(); else document.exitFullscreen(); });
-
-            const seekWrap = c.querySelector('.mp-seek-wrap');
-            seekWrap.addEventListener('click', (e) => {
-                const rect = seekWrap.getBoundingClientRect();
-                const pct = (e.clientX - rect.left) / rect.width;
+            // Seekbar Drag
+            const sw = c.querySelector(`#seek-wrap-${this.uid}`);
+            const handleSeek = (e) => {
+                const rect = sw.getBoundingClientRect();
+                const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+                const pct = Math.max(0, Math.min(1, x / rect.width));
                 this.player.seekTo(this.player.getDuration() * pct, true);
-            });
+            };
+            sw.onmousedown = sw.ontouchstart = () => { this.isDragging = true; };
+            window.addEventListener('mousemove', (e) => { if(this.isDragging) handleSeek(e); });
+            window.addEventListener('touchmove', (e) => { if(this.isDragging) handleSeek(e); });
+            window.addEventListener('mouseup', () => { this.isDragging = false; });
+            window.addEventListener('touchend', () => { this.isDragging = false; });
 
-            const qMenu = c.querySelector(`#menu-q-${this.uid}`);
-            const sMenu = c.querySelector(`#menu-s-${this.uid}`);
-            c.querySelector(`#q-btn-${this.uid}`).addEventListener('click', () => qMenu.classList.add('active'));
-            c.querySelector(`#s-btn-${this.uid}`).addEventListener('click', () => sMenu.classList.add('active'));
+            // Settings & UI
+            c.querySelector(`#settings-btn-${this.uid}`).onclick = () => this.showBottomSheet('main');
+            c.querySelector(`#sheet-overlay-${this.uid}`).onclick = (e) => {
+                if(e.target.id.includes('sheet-overlay')) e.target.classList.remove('active');
+            };
 
-            [qMenu, sMenu].forEach(m => m.addEventListener('click', (e) => {
-                if(e.target === m) m.classList.remove('active');
-                if(e.target.classList.contains('mp-item')) {
-                    m.querySelectorAll('.mp-item').forEach(i => i.classList.remove('active'));
-                    e.target.classList.add('active');
-                    const v = e.target.getAttribute('data-val');
-                    if(m === qMenu) this.player.setPlaybackQuality(v); else this.player.setPlaybackRate(parseFloat(v));
-                    m.classList.remove('active');
+            c.querySelector(`#lock-btn-${this.uid}`).onclick = () => {
+                this.isLocked = true;
+                ui.classList.add('mp-hidden');
+                // Temporary unlock logic
+                const unlock = document.createElement('div');
+                unlock.innerHTML = '<span class="material-icons-round">lock</span>';
+                unlock.style = "position:absolute; top:20px; right:20px; z-index:500; color:#fff; background:rgba(0,0,0,0.5); padding:10px; border-radius:50%; cursor:pointer;";
+                box.appendChild(unlock);
+                unlock.onclick = () => { this.isLocked = false; unlock.remove(); ui.classList.remove('mp-hidden'); };
+            };
+
+            c.querySelector(`#play-${this.uid}`).onclick = () => {
+                if(this.isPlaying) this.player.pauseVideo(); else this.player.playVideo();
+            };
+        }
+
+        startAd() {
+            const layer = this.container.querySelector(`#ad-layer-${this.uid}`);
+            const skip = this.container.querySelector(`#skip-${this.uid}`);
+            layer.classList.add('active');
+            let sec = 5;
+            const t = setInterval(() => {
+                sec--;
+                if(sec > 0) skip.innerText = `Skip in ${sec}`;
+                else {
+                    clearInterval(t);
+                    skip.innerText = "Skip Ad";
+                    skip.onclick = () => {
+                        layer.classList.remove('active');
+                        this.startVideo();
+                    };
                 }
-            }));
+            }, 1000);
+        }
+
+        startVideo() {
+            this.container.querySelector(`#poster-${this.uid}`).style.display = 'none';
+            this.player.playVideo();
         }
 
         initYT() {
-            if(window.YT && window.YT.Player) this.createPlayer();
-            else {
-                if(!window.onYouTubeIframeAPIReady) {
-                    const t = document.createElement('script'); t.src = "https://www.youtube.com/iframe_api";
-                    document.body.appendChild(t);
-                    window.onYouTubeIframeAPIReady = () => window.dispatchEvent(new Event('yt_ready'));
-                }
-                window.addEventListener('yt_ready', () => this.createPlayer());
-            }
+            if(!window.YT) {
+                const s = document.createElement('script'); s.src = "https://www.youtube.com/iframe_api";
+                document.body.appendChild(s);
+                window.onYouTubeIframeAPIReady = () => this.createPlayer();
+            } else { this.createPlayer(); }
         }
 
         createPlayer() {
             this.player = new YT.Player(`yt-${this.uid}`, {
                 videoId: this.videoId,
-                playerVars: { controls:0, rel:0, playsinline:1, origin:window.location.origin },
-                events: { 'onStateChange': (e) => this.stateChange(e) }
+                playerVars: { controls:0, rel:0, playsinline:1, modestbranding:1, disablekb:1 },
+                events: {
+                    'onReady': () => this.getTitle(),
+                    'onStateChange': (e) => {
+                        const spin = this.container.querySelector(`#spin-${this.uid}`);
+                        const btn = this.container.querySelector(`#play-${this.uid} span`);
+                        if(e.data === 1) { // Playing
+                            this.isPlaying = true;
+                            spin.style.display = 'none';
+                            btn.innerText = 'pause';
+                            this.container.querySelector(`#v-wrap-${this.uid}`).classList.add('active');
+                            this.loop();
+                        } else if(e.data === 2) { // Paused
+                            this.isPlaying = false;
+                            btn.innerText = 'play_arrow';
+                        } else if(e.data === 3) { // Buffering
+                            spin.style.display = 'block';
+                        }
+                    }
+                }
             });
         }
 
-        stateChange(e) {
-            const s = e.data;
-            const ui = this.container.querySelector(`#ui-${this.uid}`);
-            const spin = this.container.querySelector(`#spin-${this.uid}`);
-            const vWrap = this.container.querySelector(`#v-wrap-${this.uid}`);
-            const btn = this.container.querySelector(`#play-${this.uid} span`);
-            spin.style.display = 'none';
-            if(s === YT.PlayerState.PLAYING) {
-                this.isPlaying = true;
-                vWrap.classList.add('active');
-                btn.innerText = 'pause';
-                this.feedback('play_arrow');
-                this.loop();
-                this.hideUiDelay();
-            } else if (s === YT.PlayerState.PAUSED) {
-                this.isPlaying = false;
-                btn.innerText = 'play_arrow';
-                this.feedback('pause');
-                ui.classList.remove('mp-hidden');
-                clearInterval(this.timer);
-            } else if (s === YT.PlayerState.BUFFERING) {
-                spin.style.display = 'block';
-            } else if (s === YT.PlayerState.ENDED) {
-                this.isPlaying = false;
-                this.container.querySelector(`#replay-${this.uid}`).classList.add('visible');
-                ui.classList.add('mp-hidden');
-            }
-        }
-
-        toggle() { if(this.isPlaying) this.player.pauseVideo(); else this.player.playVideo(); }
-
-        seek(sec, sel) {
-            this.player.seekTo(this.player.getCurrentTime() + sec, true);
-            const el = this.container.querySelector(sel);
-            el.style.opacity = 1;
-            setTimeout(() => el.style.opacity = 0, 400);
-        }
-
         loop() {
-            clearInterval(this.timer);
-            this.timer = setInterval(() => {
-                if(this.player && this.player.getCurrentTime) {
-                    const c = this.player.getCurrentTime();
-                    const d = this.player.getDuration();
-                    const pct = (c/d)*100;
-                    this.container.querySelector('.mp-seek-fill').style.width = pct + '%';
-                    this.container.querySelector('.mp-seek-thumb').style.left = pct + '%';
-                    const fmt = (t) => { const m=Math.floor(t/60), s=Math.floor(t%60); return `${m}:${s<10?'0':''}${s}`; };
-                    this.container.querySelector(`#time-${this.uid}`).innerText = `${fmt(c)} / ${fmt(d)}`;
-                }
+            const timer = setInterval(() => {
+                if(!this.player || !this.isPlaying) { clearInterval(timer); return; }
+                const cur = this.player.getCurrentTime();
+                const dur = this.player.getDuration();
+                const pct = (cur/dur) * 100;
+                this.container.querySelector('.mp-seek-fill').style.width = pct + '%';
+                const fmt = (s) => new Date(s * 1000).toISOString().substr(14, 5);
+                this.container.querySelector(`#time-${this.uid}`).innerText = `${fmt(cur)} / ${fmt(dur)}`;
             }, 500);
-        }
-
-        hideUiDelay() {
-            clearTimeout(this.to);
-            this.to = setTimeout(() => {
-                if(this.isPlaying && !this.container.querySelector('.mp-overlay.active')) {
-                    this.container.querySelector(`#ui-${this.uid}`).classList.add('mp-hidden');
-                }
-            }, 3000);
-        }
-
-        feedback(icon) {
-            const el = this.container.querySelector(`#feed-${this.uid}`);
-            el.innerHTML = `<span class="material-icons-round" style="color:white;font-size:40px;">${icon}</span>`;
-            el.classList.add('anim'); setTimeout(() => el.classList.remove('anim'), 300);
         }
 
         async getTitle() {
             try {
                 const r = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${this.videoId}`);
                 const d = await r.json();
-                if(d.title) this.container.querySelector('.mp-title').innerText = d.title;
-            } catch(e){}
+                this.container.querySelector(`#title-${this.uid}`).innerText = d.title;
+            } catch(e) {}
         }
     }
 
-    const init = () => {
-        document.querySelectorAll('.mista-embed').forEach(el => {
-            if(!el.getAttribute('data-init')) { new MistaPlayer(el); el.setAttribute('data-init', 'true'); }
-        });
-    };
+    const init = () => { document.querySelectorAll('.mista-embed').forEach(el => { if(!el.getAttribute('data-init')) { new MistaPlayer(el); el.setAttribute('data-init', 'true'); } }); };
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-    window.initMistaPlayers = init;
 })();
