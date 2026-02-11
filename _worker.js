@@ -1,3 +1,5 @@
+import { handleYouTube } from "./lib/youtube.js";
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -128,6 +130,17 @@ export default {
       });
     }
 
+    // =========================
+// YOUTUBE ROUTES
+// =========================
+if (path.startsWith("/api/video") ||
+    path.startsWith("/api/search") ||
+    path.startsWith("/api/channel") ||
+    path.startsWith("/api/playlist") ||
+    path.startsWith("/api/transcript")) {
+
+  return await handleYouTube(request);
+}
     // =========================
     // DEFAULT: Serve static assets (ads.js, HTML, sab kuch)
     // =========================
