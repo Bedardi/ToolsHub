@@ -5,7 +5,8 @@
   },
   "mistatube": {
     "mistatube": "https://mistatube.mistahub.in",
-    "status": "active"
+    "status": "active",
+    "color": "#FF5522"
   },
   "tempmail": {
     "tempmail": "https://tempmail.mistahub.in",
