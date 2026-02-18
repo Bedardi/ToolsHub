@@ -1,5 +1,14 @@
 {
-  "zingle": "https://zingle.mistahub.in",
-  "mistatube": "https://mistatube.mistahub.in",
-  "tempmail": "https://tempmail.mistahub.in"
+  "zingle": {
+    "zingle": "https://zingle.mistahub.in",
+    "status": "active"
+  },
+  "mistatube": {
+    "mistatube": "https://mistatube.mistahub.in",
+    "status": "active"
+  },
+  "tempmail": {
+    "tempmail": "https://tempmail.mistahub.in",
+    "status": "inactive"
+  }
 }
