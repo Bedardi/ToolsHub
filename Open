@@ -1,15 +1,37 @@
 {
   "zingle": {
     "zingle": "https://zingle.mistahub.in",
-    "status": "active"
+    "status": "active",
+    "channel": "zingle",
+    "color": "#FF5522",
+    "splash": "https://mistafy.pages.dev/lottie/zingle"
   },
   "mistatube": {
     "mistatube": "https://mistatube.mistahub.in",
     "channel": "MoviePlus",
-    "color": "#FF5522"
+    "color": "#FF5522",
+    "splash": "https://mistafy.pages.dev/splashh.json"
   },
   "tempmail": {
     "tempmail": "https://tempmail.mistahub.in",
-    "status": "inactive"
+    "status": "active",
+    "channel": "tempmail",
+    "color": "#FF5522",
+    "splash": "https://mistafy.pages.dev/lottie/tempmail"
+  },
+ "store": {
+    "store": "https://store.mistahub.in",
+    "status": "active",
+    "channel": "store",
+    "color": "#FF5522",
+    "splash": "https://mistafy.pages.dev/lottie/store"
+  },
+"webbuilder": {
+    "webbuilder": "https://builder.mistahub.in",
+    "status": "active",
+    "channel": "webbuilder",
+    "color": "#FF5522",
+    "splash": "https://mistafy.pages.dev/lottie/webbuilder"
+  },
   }
 }
